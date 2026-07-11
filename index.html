@@ -1,0 +1,2397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생기부 나침반 · 학교생활기록부 분석 및 기재 나침반</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --ink-soft:#4C5A78;
+    --ink-faint:#8993A8;
+    --paper:#F2F4F0;
+    --card:#FFFFFF;
+    --line:#DDE2DD;
+    --line-strong:#C4CBC4;
+    --gold:#B8863B;
+    --gold-soft:#EADCC0;
+    --teal:#2F7566;
+    --teal-soft:#DCEAE5;
+    --brick:#B5432E;
+    --brick-soft:#F5DCD5;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(27,42,74,.06), 0 8px 24px -12px rgba(27,42,74,.18);
+    --serif:'Noto Serif KR', serif;
+    --sans:'Noto Sans KR', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(27,42,74,.05) 1px, transparent 0);
+    background-size:22px 22px;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--gold-soft);}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px; border-radius:6px;}
+  button{font-family:inherit;}
+
+  /* ---------- shell layout ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns:86px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width:720px){
+    .shell{grid-template-columns:64px 1fr;}
+  }
+
+  /* ---------- icon rail ---------- */
+  .rail{
+    background:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0 16px;
+    position:sticky; top:0; height:100vh;
+  }
+  .rail .mark{
+    width:44px;height:44px;margin-bottom:26px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .rail .mark svg{width:100%;height:100%;}
+  .rail .mark .ring{ animation: spin 90s linear infinite; transform-origin:50% 50%; }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  @media (prefers-reduced-motion:reduce){ .rail .mark .ring{animation:none;} }
+
+  .rail nav{display:flex;flex-direction:column;gap:6px;width:100%;align-items:center;}
+  .rail-btn{
+    width:52px;height:52px;border:none;background:transparent;border-radius:12px;
+    color:#B9C2D6; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    position:relative; transition:background .15s ease, color .15s ease;
+  }
+  .rail-btn svg{width:22px;height:22px;}
+  .rail-btn:hover{background:rgba(255,255,255,.08); color:#fff;}
+  .rail-btn.active{background:var(--gold); color:var(--ink);}
+  .rail-btn .tip{
+    position:absolute; left:64px; top:50%; transform:translateY(-50%);
+    background:#fff; color:var(--ink); font-size:12.5px; font-weight:600;
+    padding:6px 10px; border-radius:8px; white-space:nowrap; box-shadow:var(--shadow);
+    opacity:0; pointer-events:none; transition:opacity .12s ease; z-index:40;
+  }
+  .rail-btn:hover .tip{opacity:1;}
+  .rail-foot{margin-top:auto; color:#5D6B8C; font-family:var(--mono); font-size:10px; text-align:center; line-height:1.5;}
+
+  /* ---------- main ---------- */
+  main{padding:26px 30px 60px; max-width:1360px;}
+  .view{display:none;}
+  .view.active{display:block; animation:rise .28s ease;}
+  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+
+  .topline{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap;}
+  .eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.14em; color:var(--gold); text-transform:uppercase; font-weight:600;}
+  h1.pagetitle{font-family:var(--serif); font-weight:900; font-size:30px; margin:2px 0 0; letter-spacing:-.01em;}
+  .sub{color:var(--ink-soft); font-size:14.5px; max-width:560px; line-height:1.6;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+  .pad{padding:20px 22px;}
+
+  /* ---------- dashboard ---------- */
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+  .grid-2{display:grid; grid-template-columns:1.3fr 1fr; gap:16px;}
+  @media (max-width:980px){ .grid-3{grid-template-columns:1fr;} .grid-2{grid-template-columns:1fr;} }
+
+  .stat{padding:18px 20px;}
+  .stat .n{font-family:var(--serif); font-size:34px; font-weight:900; color:var(--ink);}
+  .stat .l{font-size:12.5px; color:var(--ink-soft); margin-top:2px;}
+  .stat .tag{display:inline-block; margin-top:10px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px;}
+  .tag.gold{background:var(--gold-soft); color:#7A5A1F;}
+  .tag.teal{background:var(--teal-soft); color:#1F5145;}
+  .tag.brick{background:var(--brick-soft); color:#7C2C1C;}
+
+  .source-row{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:16px;}
+  @media (max-width:860px){.source-row{grid-template-columns:1fr;}}
+  .source-card{padding:16px 18px; border-left:4px solid var(--gold);}
+  .source-card h4{margin:0 0 6px; font-family:var(--serif); font-size:15.5px;}
+  .source-card p{margin:0; font-size:12.8px; color:var(--ink-soft); line-height:1.6;}
+  .source-card .role{font-family:var(--mono); font-size:10.5px; color:var(--teal); margin-top:8px; display:block;}
+
+  .cta-row{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;}
+  .btn{
+    border:none; cursor:pointer; font-weight:700; font-size:13.5px; border-radius:10px;
+    padding:11px 18px; display:inline-flex; align-items:center; gap:8px; transition:transform .1s ease, filter .12s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.primary{background:var(--ink); color:#fff;}
+  .btn.primary:hover{filter:brightness(1.15);}
+  .btn.gold{background:var(--gold); color:#fff;}
+  .btn.gold:hover{filter:brightness(1.08);}
+  .btn.ghost{background:transparent; border:1.4px solid var(--line-strong); color:var(--ink);}
+  .btn.ghost:hover{border-color:var(--ink);}
+  .btn.sm{padding:7px 12px; font-size:12.5px; border-radius:8px;}
+
+  /* ---------- workspace ---------- */
+  .field-row{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px;}
+  @media (max-width:1100px){.field-row{grid-template-columns:repeat(2,1fr);}}
+  .field label{display:block; font-size:11.5px; font-weight:700; color:var(--ink-soft); margin-bottom:5px; letter-spacing:.02em;}
+  select, input[type=text], textarea{
+    width:100%; font-family:var(--sans); border:1.4px solid var(--line-strong); border-radius:9px;
+    padding:9px 11px; font-size:13.5px; color:var(--ink); background:#fff;
+  }
+  select:focus, input:focus, textarea:focus{border-color:var(--gold);}
+
+  .workspace-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; align-items:start;}
+  @media (max-width:1180px){ .workspace-grid{grid-template-columns:1fr;} }
+
+  /* ---------- file import panel ---------- */
+  .import-panel{display:none; margin-bottom:16px;}
+  .import-panel.open{display:block;}
+  .dropzone{
+    border:2px dashed var(--line-strong); border-radius:12px; padding:22px; text-align:center;
+    background:#FBFBF8; cursor:pointer; transition:border-color .15s ease, background .15s ease;
+  }
+  .dropzone.drag{border-color:var(--gold); background:var(--gold-soft);}
+  .dropzone svg{width:26px;height:26px; color:var(--ink-faint); margin-bottom:6px;}
+  .dropzone .hint{font-size:11.8px; color:var(--ink-faint); margin-top:4px;}
+  .filelist{margin-top:10px; font-size:12.5px;}
+  .filelist .fitem{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line);}
+  .seg-table-wrap{max-height:280px; overflow:auto; margin-top:14px; border:1px solid var(--line); border-radius:10px;}
+  .seg-row{display:grid; grid-template-columns:110px 110px 1fr 70px; gap:8px; align-items:center; padding:9px 12px; border-bottom:1px solid var(--line); font-size:12.2px;}
+  .seg-row:last-child{border-bottom:none;}
+  .seg-row .seg-area{font-weight:700; color:var(--ink);}
+  .seg-row .seg-sub{color:var(--ink-soft); font-family:var(--mono); font-size:11px;}
+  .seg-row .seg-preview{color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .parse-summary{font-size:12px; color:var(--ink-soft); margin-top:10px;}
+
+  /* ---------- extra material / AI merge ---------- */
+  .divider{border:none; border-top:1px dashed var(--line-strong); margin:18px 0 14px;}
+  .subhead{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
+  .subhead h4{font-family:var(--serif); font-size:14px; margin:0;}
+  textarea#extraText{min-height:96px; font-size:13px;}
+  .ai-settings{display:none; background:#FBFBF8; border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-top:8px; font-size:12px;}
+  .ai-settings.open{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .ai-settings label{display:block; font-size:10.6px; font-weight:700; color:var(--ink-soft); margin-bottom:4px;}
+  .ai-settings input{font-size:12.5px; padding:7px 9px;}
+  .ai-settings .note{grid-column:1/-1; font-size:10.8px; color:var(--ink-faint); line-height:1.5;}
+  .merge-result{border:1.4px solid var(--gold-soft); background:#FFFDF7; border-radius:10px; padding:12px 14px; margin-top:12px;}
+  .merge-result .mr-head{display:flex; justify-content:space-between; align-items:center; font-family:var(--mono); font-size:10.6px; color:var(--gold); font-weight:700; margin-bottom:6px;}
+  .merge-result p.mr-text{font-size:13.2px; line-height:1.65; white-space:pre-wrap; margin:0 0 10px;}
+  .mr-badges{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .mr-badge{font-size:10.6px; font-weight:700; padding:3px 8px; border-radius:20px; background:var(--teal-soft); color:#1F5145;}
+  .mr-badge.warn{background:var(--brick-soft); color:#7C2C1C;}
+  .spinner{display:inline-block; width:13px; height:13px; border:2px solid #E4C88C; border-top-color:var(--gold); border-radius:50%; animation:spin2 .7s linear infinite; vertical-align:-2px; margin-right:6px;}
+  @keyframes spin2{to{transform:rotate(360deg);}}
+  .vpill{font-family:var(--mono); font-size:10px; background:var(--teal); color:#fff; padding:2px 7px; border-radius:6px; margin-left:8px;}
+  #importBadge{font-family:var(--mono); font-size:10px; background:var(--gold); color:#fff; padding:2px 6px; border-radius:10px; margin-left:6px;}
+
+  /* ---------- overview (종합 진단) ---------- */
+  .ov-empty{padding:34px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px;}
+  .cov-table{width:100%; border-collapse:collapse; font-size:12px;}
+  .cov-table th, .cov-table td{border:1px solid var(--line); padding:8px; text-align:center;}
+  .cov-table th{background:#F7F8F4; font-family:var(--mono); font-size:10.6px; color:var(--ink-soft);}
+  .cov-table td.filled{background:var(--teal-soft); color:#1F5145; font-weight:700;}
+  .cov-table td.empty{color:var(--ink-faint);}
+  .cov-table td.rowhead{font-weight:700; text-align:left; background:#FBFBF8;}
+  .term-tip{border-left:4px solid var(--gold); background:#FFFDF7; border-radius:8px; padding:11px 13px; margin-bottom:9px;}
+  .term-tip.next{border-left-color:var(--teal); background:#F7FBFA;}
+  .term-tip .tt-tag{font-family:var(--mono); font-size:10px; font-weight:700; color:var(--gold);}
+  .term-tip.next .tt-tag{color:var(--teal);}
+  .term-tip p{margin:4px 0 0; font-size:13px; line-height:1.55;}
+  .track-bar-row{display:grid; grid-template-columns:90px 1fr 34px; align-items:center; gap:8px; font-size:12px; margin-bottom:6px;}
+  .track-bar-row .bar{height:8px; background:#EDEFE9; border-radius:5px; overflow:hidden;}
+  .track-bar-row .bar span{display:block; height:100%; background:var(--gold);}
+
+  /* ---------- C-code reference cards ---------- */
+  .c-card-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:12px;}
+  @media (max-width:900px){ .c-card-grid{grid-template-columns:1fr;} }
+  .c-card{border:1.4px solid var(--line); border-radius:12px; padding:14px 16px; background:#FBFBF8;}
+  .c-card-head{display:flex; align-items:center; gap:8px; margin-bottom:6px;}
+  .c-card-head b{font-family:var(--serif); font-size:14.5px;}
+  .c-card-desc{font-size:12.6px; font-weight:600; color:var(--ink); margin:0 0 6px;}
+  .c-card-long{font-size:12.2px; color:var(--ink-soft); line-height:1.6; margin:0 0 10px;}
+  .c-card-example{background:#fff; border:1px dashed var(--line-strong); border-radius:8px; padding:9px 11px; font-size:12.4px; line-height:1.55; color:var(--ink);}
+  .c-card-example .tag2{display:block; font-family:var(--mono); font-size:10px; color:var(--gold); font-weight:700; margin-bottom:3px;}
+
+  /* ---------- external quick links ---------- */
+  .links-panel{display:none; margin-bottom:16px;}
+  .links-panel.open{display:block;}
+  .links-row{display:grid; grid-template-columns:80px 1fr auto; gap:8px; align-items:center; margin-bottom:8px;}
+  .links-row label{font-size:12.5px; font-weight:700; color:var(--ink-soft);}
+  .links-row input{font-size:12.5px; padding:8px 10px;}
+
+  /* ---------- overview weak-elements list ---------- */
+  .c-weak-list{margin-top:12px; display:flex; flex-direction:column; gap:12px;}
+  .c-weak-item{border-bottom:1px solid var(--line); padding-bottom:10px;}
+  .c-weak-item:last-child{border-bottom:none; padding-bottom:0;}
+  .c-weak-top{display:flex; align-items:center; gap:8px;}
+  .c-weak-top b{font-size:13px;}
+  .c-weak-top .c-weak-pct{margin-left:auto; font-family:var(--mono); font-weight:700; font-size:12px; color:var(--ink);}
+  .c-weak-item .bar{height:6px; background:#EDEFE9; border-radius:4px; overflow:hidden;}
+  .c-weak-item .bar span{display:block; height:100%; background:var(--gold);}
+  .c-weak-desc{font-size:12.2px; color:var(--ink-soft); margin:0; line-height:1.55;}
+
+  /* ---------- past records reference panel ---------- */
+  .past-item{border:1.3px solid var(--line); border-radius:9px; padding:9px 11px; margin-bottom:7px; background:#FBFBF8;}
+  .past-item .past-meta{font-family:var(--mono); font-size:10.3px; color:var(--gold); font-weight:700; margin-bottom:4px;}
+  .past-item .past-text{font-size:12.2px; color:var(--ink-soft); line-height:1.55; max-height:220px; overflow:auto;}
+  .past-window{
+    border:1.6px solid var(--line-strong); border-radius:10px; background:#F3F3EE;
+    max-height:460px; overflow-y:auto; padding:10px;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(320px,1fr)); gap:10px; align-content:start;
+  }
+  .past-window .past-item{background:#fff; margin:0; box-shadow:0 1px 2px rgba(27,42,74,.05);}
+  .past-empty{grid-column:1/-1; padding:22px; text-align:center; color:var(--ink-faint); font-size:12.6px;}
+
+  /* ---------- career hope field ---------- */
+  .hope-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .hope-item{border:1.4px solid var(--gold-soft); background:#FFFDF7; border-radius:10px; padding:9px 13px; min-width:180px; flex:1;}
+  .hope-item .hope-grade{font-family:var(--mono); font-size:10.5px; color:var(--gold); font-weight:700; margin-bottom:3px;}
+  .hope-item .hope-value{font-size:13px; color:var(--ink); font-weight:600; line-height:1.5;}
+  .hope-empty{padding:14px; text-align:center; color:var(--ink-faint); font-size:12.4px;}
+  .pane h3{font-family:var(--serif); font-size:15.5px; margin:0 0 12px; display:flex; align-items:center; gap:8px;}
+  .pane h3 .num{font-family:var(--mono); font-size:11px; background:var(--ink); color:#fff; padding:2px 7px; border-radius:5px;}
+
+  textarea#rawText{min-height:340px; line-height:1.65; font-size:14px; resize:vertical;}
+  .meter-row{display:flex; gap:12px; margin-top:10px; flex-wrap:wrap;}
+  .meter{flex:1; min-width:140px;}
+  .meter .label{display:flex; justify-content:space-between; font-size:11.5px; color:var(--ink-soft); font-family:var(--mono);}
+  .meter .bar{height:7px; border-radius:5px; background:#EDEFE9; margin-top:4px; overflow:hidden;}
+  .meter .fill{height:100%; border-radius:5px; background:var(--teal); transition:width .25s ease, background .25s ease;}
+
+  .issue{border:1.4px solid var(--brick-soft); background:#FDF7F5; border-radius:10px; padding:10px 12px; margin-bottom:8px;}
+  .issue.suspect{border-color:var(--gold-soft); background:#FEFBF3;}
+  .issue .code{font-family:var(--mono); font-size:10.5px; font-weight:700; color:var(--brick);}
+  .issue.suspect .code{color:#8A6112;}
+  .issue .match{font-weight:700; font-size:13px; margin:3px 0;}
+  .issue .clause{font-size:11.8px; color:var(--ink-soft); line-height:1.5;}
+  .empty-good{display:flex; gap:10px; align-items:flex-start; padding:14px; background:var(--teal-soft); border-radius:10px; font-size:13px; color:#1F5145;}
+
+  .radar-wrap{display:flex; justify-content:center; margin-bottom:6px;}
+  .axis-list{display:flex; flex-direction:column; gap:8px; margin-top:6px;}
+  .axis-row{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; font-size:12.5px;}
+  .axis-row .bar{height:6px; background:#EDEFE9; border-radius:4px; overflow:hidden;}
+  .axis-row .bar span{display:block; height:100%; background:var(--gold); border-radius:4px; transition:width .3s ease;}
+  .axis-score{font-family:var(--mono); font-weight:700; color:var(--ink); font-size:12px;}
+
+  .compass-gauge{display:flex; flex-direction:column; align-items:center; margin:14px 0 4px;}
+  .compass-gauge svg{width:150px;height:150px;}
+  .compass-gauge .needle{transform-origin:75px 75px; transition:transform .6s cubic-bezier(.2,.9,.25,1);}
+  .compass-gauge .gtxt{display:flex; justify-content:space-between; width:150px; font-size:10.5px; color:var(--ink-soft); font-family:var(--mono); margin-top:2px;}
+
+  .chip-grid{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:14px;}
+  .chip{font-size:11px; border-radius:8px; padding:6px 8px; display:flex; align-items:center; gap:6px; border:1.3px solid var(--line);}
+  .chip.on{background:var(--teal-soft); border-color:transparent; color:#1F5145; font-weight:700;}
+  .chip.off{color:var(--ink-faint);}
+  .chip .dot{width:7px;height:7px;border-radius:50%; background:var(--ink-faint);}
+  .chip.on .dot{background:var(--teal);}
+
+  .suggest-card{border:1.4px solid var(--line); border-radius:10px; padding:11px 12px; margin-top:10px; background:#FBFBF8;}
+  .suggest-card .tag2{font-family:var(--mono); font-size:10px; color:var(--gold); font-weight:700;}
+  .suggest-card p{margin:5px 0 0; font-size:12.8px; line-height:1.55;}
+
+  .disclaimer{font-size:11.6px; color:var(--ink-soft); background:#FFF; border:1px dashed var(--line-strong); border-radius:10px; padding:10px 12px; margin-top:16px; line-height:1.6;}
+
+  /* ---------- dictionary ---------- */
+  .dict-search{margin-bottom:16px;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  table th{text-align:left; font-family:var(--mono); font-size:10.6px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.05em; padding:8px 10px; border-bottom:2px solid var(--ink);}
+  table td{padding:10px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table tr:hover td{background:#FAFAF6;}
+  .codepill{font-family:var(--mono); font-weight:700; font-size:11px; background:var(--ink); color:#fff; padding:2px 7px; border-radius:6px;}
+
+  .tabs{display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap;}
+  .tab{border:1.4px solid var(--line-strong); background:#fff; border-radius:20px; padding:7px 14px; font-size:12.6px; font-weight:700; cursor:pointer; color:var(--ink-soft);}
+  .tab.active{background:var(--ink); color:#fff; border-color:var(--ink);}
+
+  /* ---------- history ---------- */
+  .hist-item{display:flex; justify-content:space-between; align-items:center; padding:13px 16px; border-bottom:1px solid var(--line);}
+  .hist-item:last-child{border-bottom:none;}
+  .hist-item .meta{font-size:12px; color:var(--ink-soft);}
+  .hist-item .name{font-weight:700; font-size:13.6px;}
+  .hist-empty{padding:40px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px;}
+
+  /* ---------- help ---------- */
+  .help-block{margin-bottom:22px;}
+  .help-block h3{font-family:var(--serif); font-size:16.5px; margin-bottom:8px;}
+  .faq dt{font-weight:700; margin-top:12px; font-size:13.6px;}
+  .faq dd{margin:4px 0 0; font-size:13px; color:var(--ink-soft); line-height:1.65;}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-thumb{background:#CBD1C7;border-radius:8px;}
+
+  @media print{
+    .rail, .cta-row, .tabs{display:none !important;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ============ ICON RAIL ============ -->
+  <aside class="rail">
+    <div class="mark" title="생기부 나침반">
+      <svg viewBox="0 0 44 44" fill="none">
+        <g class="ring">
+          <circle cx="22" cy="22" r="19" stroke="#B8863B" stroke-width="1.4"/>
+          <g stroke="#7C8AAE" stroke-width="1.1">
+            <line x1="22" y1="2" x2="22" y2="6"/>
+            <line x1="22" y1="38" x2="22" y2="42"/>
+            <line x1="2" y1="22" x2="6" y2="22"/>
+            <line x1="38" y1="22" x2="42" y2="22"/>
+          </g>
+        </g>
+        <path d="M22 10 L27 22 L22 34 L17 22 Z" fill="#B8863B"/>
+        <path d="M22 10 L27 22 L22 22 Z" fill="#EADCC0"/>
+        <circle cx="22" cy="22" r="2.6" fill="#1B2A4A"/>
+      </svg>
+    </div>
+    <nav>
+      <button class="rail-btn active" data-view="overview" aria-label="종합 진단">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/></svg>
+        <span class="tip">종합 진단(방향성)</span>
+      </button>
+      <button class="rail-btn" data-view="workspace" aria-label="분석 작업">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><line x1="21" y1="21" x2="15.3" y2="15.3"/></svg>
+        <span class="tip">분석 작업</span>
+      </button>
+      <button class="rail-btn" data-view="dictionary" aria-label="규정 사전">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span class="tip">규정·평가 사전</span>
+      </button>
+      <button class="rail-btn" data-view="history" aria-label="검토 이력">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>
+        <span class="tip">검토 이력</span>
+      </button>
+      <button class="rail-btn" data-view="help" aria-label="도움말">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 1.9-2.4 3.6"/><line x1="12" y1="17" x2="12" y2="17.1"/></svg>
+        <span class="tip">도움말</span>
+      </button>
+    </nav>
+    <div class="rail-foot">v1.8<br>2026-1·2</div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main>
+
+    <!-- ============ OVERVIEW (종합 진단 · 가장 먼저 배치) ============ -->
+    <section id="view-overview" class="view active">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Whole-Record Direction</div>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v1.8</span></h1>
+          <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn ghost sm" onclick="goTo('workspace')">특정 항목 편집은 분석 작업에서 →</button>
+          <button class="btn ghost sm" style="border-color:var(--brick-soft); color:#7C2C1C;" onclick="resetAllRecords()">🗑 기록 초기화</button>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="font-weight:700; font-size:13px;">📅 현재 학년·학기</div>
+        <div class="field" style="max-width:130px; margin:0;">
+          <select id="curGradeSel">
+            <option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:110px; margin:0;">
+          <select id="curSemSel">
+            <option value="1">1학기</option><option value="2">2학기</option>
+          </select>
+        </div>
+        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">지금이 실제로 몇 학년 몇 학기인지 알려주시면, 자료가 아직 없는 학기라도 ‘이번 학기’ 기준으로 정확하게 안내합니다. (기본값은 업로드한 자료 중 가장 최근 학기입니다)</p>
+      </div>
+
+      <div class="card pad" style="margin-bottom:16px;" id="careerHopeCard">
+        <div style="font-weight:700; font-size:13px; margin-bottom:8px;">🎯 진로 희망분야 <span style="font-family:var(--mono); font-size:10.3px; color:var(--ink-faint); font-weight:400;">진로활동 기록에서 자동으로 찾아 보여줍니다</span></div>
+        <div id="careerHopeBody"></div>
+      </div>
+
+      <div class="card pad" id="ovUploadCard">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">📂 생기부 전체 파일 불러오기 <span style="font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); font-weight:400;">PDF · Excel(xlsx/xls) · TXT</span></h3>
+        <div class="dropzone" id="dropzone2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <div>파일을 여기로 끌어다 놓거나 클릭해서 선택하세요</div>
+          <div class="hint">업로드한 파일은 이 화면과 ‘분석 작업’ 탭에서 함께 사용됩니다. 파일은 브라우저 안에서만 처리되며 서버로 전송되지 않습니다.</div>
+          <input type="file" id="fileInput2" accept=".pdf,.xlsx,.xls,.txt" multiple style="display:none;">
+        </div>
+        <div class="filelist" id="fileList2"></div>
+        <div id="parseSummary2" class="parse-summary"></div>
+        <div class="seg-table-wrap" id="segWrap" style="display:none;">
+          <div id="segTable"></div>
+        </div>
+      </div>
+
+      <div id="ovBody"></div>
+    </section>
+
+    <!-- ============ WORKSPACE ============ -->
+    <section id="view-workspace" class="view">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Analysis Desk</div>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v1.8</span></h1>
+          <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn ghost sm" onclick="goTo('overview')" id="goOverviewBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            생기부 파일 불러오기
+            <span id="importBadge" style="display:none;"></span>
+          </button>
+          <button class="btn ghost sm" onclick="toggleLinksPanel()">🔗 바로가기</button>
+          <button class="btn ghost sm" onclick="loadSample()">예시 불러오기</button>
+          <button class="btn ghost sm" onclick="clearWork()">초기화</button>
+          <button class="btn gold sm" onclick="runAnalysis()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+            분석하기
+          </button>
+        </div>
+      </div>
+
+      <div class="card pad links-panel" id="linksPanel">
+        <h3 style="font-family:var(--serif); font-size:14.5px; margin:0 0 10px;">🔗 바로가기 링크 <span style="font-family:var(--mono); font-size:10.3px; color:var(--ink-faint); font-weight:400;">한 번 입력해 두면 이 브라우저에 저장됩니다</span></h3>
+        <div class="links-row">
+          <label>리로스쿨</label>
+          <input type="text" id="linkReroschool" placeholder="예: https://www.reroschool.co.kr/...">
+          <button class="btn ghost sm" onclick="openQuickLink('linkReroschool')">열기</button>
+        </div>
+        <div class="links-row">
+          <label>챗봇</label>
+          <input type="text" id="linkChatbot" placeholder="예: https://claude.ai/ 또는 학교에서 쓰는 챗봇 주소">
+          <button class="btn ghost sm" onclick="openQuickLink('linkChatbot')">열기</button>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:16px;">
+        <h3 style="font-family:var(--serif); font-size:15px; margin:0 0 10px;">📚 지난 생기부 내용 확인 <span style="font-family:var(--mono); font-size:10.3px; color:var(--ink-faint); font-weight:400;">읽기 전용 · 원문 입력과는 별개</span></h3>
+        <div class="field-row">
+          <div class="field">
+            <label>학년</label>
+            <select id="pastGrade">
+              <option value="1">1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+            </select>
+          </div>
+          <div class="field" id="pastSemField">
+            <label>학기</label>
+            <select id="pastSem">
+              <option value="1">1학기</option>
+              <option value="2">2학기</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>기재 영역</label>
+            <select id="pastArea"></select>
+          </div>
+          <div class="field" id="pastSubjectField" style="display:none;">
+            <label>과목명</label>
+            <input type="text" id="pastSubject" placeholder="비워두면 해당 영역 전체를 봅니다">
+          </div>
+        </div>
+        <div id="pastRecordsBody" class="past-window"></div>
+        <p style="font-size:10.8px; color:var(--ink-faint); margin:8px 0 0;" id="pastRecordsHint">위에서 학년·학기·영역(·과목)을 선택해 지난 기록을 확인하세요. 여기서는 수정할 수 없으며, 아래 원문 입력창과는 별개입니다.</p>
+      </div>
+
+      <div class="card pad">
+        <h3 style="font-family:var(--serif); font-size:15px; margin:0 0 10px;">✏️ 새로 작성할 내용</h3>
+        <div class="field-row">
+          <div class="field">
+            <label>학년</label>
+            <select id="inGrade">
+              <option value="1" selected>1학년</option>
+              <option value="2">2학년</option>
+              <option value="3">3학년</option>
+            </select>
+            <div id="curriBadge" style="font-family:var(--mono); font-size:10.3px; color:var(--teal); margin-top:5px;"></div>
+          </div>
+          <div class="field" id="semField">
+            <label>학기</label>
+            <select id="inSem">
+              <option value="1" selected>1학기</option>
+              <option value="2">2학기</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>기재 영역</label>
+            <select id="inArea"></select>
+          </div>
+          <div class="field" id="subjectField" style="display:none;">
+            <label>과목명</label>
+            <input type="text" id="inSubject" placeholder="예: 화학Ⅰ (공통과목명 입력 시 합산규칙 자동 적용)">
+          </div>
+          <div class="field">
+            <label>전형 유형</label>
+            <select id="inAdmType">
+              <option value="종합">학생부종합전형</option>
+              <option value="교과">학생부교과전형</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>지원 계열</label>
+            <select id="inTrack"></select>
+          </div>
+        </div>
+
+        <div class="workspace-grid">
+          <!-- pane 1: input -->
+          <div class="pane">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="margin-bottom:0;"><span class="num">01</span> 원문 입력</h3>
+              <button class="btn ghost sm" style="padding:5px 10px; font-size:11.3px;" onclick="copyDraft()" id="copyBtn">📋 복사</button>
+            </div>
+            <textarea id="rawText" placeholder="교사가 관찰한 사실을 바탕으로 작성한 특기사항 초안을 붙여넣으세요. (명사형 종결, 특수문자 지양)" style="margin-top:8px;"></textarea>
+            <div class="meter-row">
+              <div class="meter">
+                <div class="label"><span>글자수(공백제외)</span><span id="charLabel">0 / 500</span></div>
+                <div class="bar"><div class="fill" id="charFill"></div></div>
+              </div>
+              <div class="meter">
+                <div class="label"><span>바이트(한글=3B)</span><span id="byteLabel">0 / 1500</span></div>
+                <div class="bar"><div class="fill" id="byteFill"></div></div>
+              </div>
+            </div>
+            <div id="budgetNote" style="font-size:11.3px; color:var(--ink-soft); margin-top:8px; line-height:1.55;"></div>
+
+            <hr class="divider">
+            <div class="subhead">
+              <h4>➕ 추가 자료 입력 (새로 관찰된 내용)</h4>
+              <button class="btn ghost sm" style="padding:5px 10px; font-size:11.5px;" onclick="toggleAiSettings()">AI 설정</button>
+            </div>
+            <textarea id="extraText" placeholder="예: 최근 동아리 발표에서 데이터 시각화 도구를 새로 활용함, 실험 중 오차 원인을 다시 찾아 재검증함 등 — 메모 형태로 입력해도 됩니다."></textarea>
+
+            <div class="ai-settings" id="aiSettings">
+              <div>
+                <label>Anthropic API 키 (세션 한정, 저장 안 됨)</label>
+                <input type="password" id="apiKey" placeholder="sk-ant-...">
+              </div>
+              <div>
+                <label>모델</label>
+                <input type="text" id="apiModel" value="claude-sonnet-5">
+              </div>
+              <div class="note">키를 입력하지 않으면 규칙 기반 병합(문장을 이어붙이는 수준)으로 대체됩니다. 키는 이 브라우저 탭에만 보관되며 새로고침하면 사라집니다. 실제 배포 시에는 GAS 백엔드 등 서버 측에서 키를 관리하는 구조를 권장합니다.</div>
+            </div>
+
+            <button class="btn primary sm" style="margin-top:10px; width:100%; justify-content:center;" onclick="runMerge()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+              기존 내용과 연계해 AI로 다시 쓰기
+            </button>
+            <div id="mergeOut"></div>
+          </div>
+
+          <!-- pane 2: compliance -->
+          <div class="pane">
+            <h3><span class="num">02</span> 규정 준수 검사 <span style="font-family:var(--mono); font-size:10px; color:var(--ink-faint);">기재요령 근거</span></h3>
+            <div id="issueList"></div>
+          </div>
+
+          <!-- pane 3: scoring + compass -->
+          <div class="pane">
+            <h3><span class="num">03</span> 점수 · 나침반</h3>
+            <div class="compass-gauge">
+              <svg viewBox="0 0 150 150">
+                <path d="M15 110 A62 62 0 0 1 135 110" fill="none" stroke="#F0DED4" stroke-width="10" stroke-linecap="round"/>
+                <path d="M15 110 A62 62 0 0 1 75 48" fill="none" stroke="#EADCC0" stroke-width="10" stroke-linecap="round"/>
+                <path d="M75 48 A62 62 0 0 1 135 110" fill="none" stroke="#DCEAE5" stroke-width="10" stroke-linecap="round"/>
+                <g class="needle" id="needle" style="transform:rotate(-90deg);">
+                  <line x1="75" y1="75" x2="75" y2="24" stroke="#1B2A4A" stroke-width="3" stroke-linecap="round"/>
+                  <circle cx="75" cy="75" r="6" fill="#1B2A4A"/>
+                </g>
+              </svg>
+              <div class="gtxt"><span>보완 필요</span><span>서술 완성도 높음</span></div>
+            </div>
+            <div id="radarScoreText" style="text-align:center; font-family:var(--mono); font-size:12px; color:var(--ink-soft);">분석 전</div>
+            <div class="axis-list" id="axisList"></div>
+            <div id="cChecklist" class="chip-grid"></div>
+            <div id="suggestList"></div>
+          </div>
+        </div>
+
+        <div class="disclaimer">
+          ⚠ 이 화면의 점수·체크리스트는 <b>규칙 기반(키워드 휴리스틱) 프로토타입</b>입니다. 실제 배포판에서는 3.7절 프롬프트 설계(규정검사용 / 정성평가용 / 나침반코칭용 3분리 프롬프트)에 따라 Claude API로 대체되도록 설계되어 있습니다. 점수는 <b>서술 완성도 진단 지표</b>이며 합격 가능성을 의미하지 않습니다. 최종 나이스 입력 및 책임은 교사에게 있습니다.<br>
+          ⚠ 이번 버전은 <b>2026학년도 기재요령의 1~2학년(2022 개정 교육과정) 반영항목</b>을 기준으로 재검토했습니다. 독서활동상황(대입 미반영)과 봉사활동 특기사항(정성 기재 불가 항목)은 코칭 대상에서 제외했습니다 — 사유는 ‘규정·평가 사전’ 탭에서 확인할 수 있습니다.<br>
+          ⚠ <b>파일 불러오기</b>의 영역 인식은 제목 문구 기반 추정이며, <b>AI 연계 병합</b>의 결과는 참고용 초안입니다. 두 기능 모두 사람이 최종 확인한 뒤 ‘적용’ 버튼을 눌러야만 원문에 반영되며, 자동으로 나이스에 입력되지 않습니다.
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DICTIONARY ============ -->
+    <section id="view-dictionary" class="view">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Reference</div>
+          <h1 class="pagetitle">규정 · 평가 사전</h1>
+          <p class="sub">부록 A~C를 그대로 조회할 수 있는 참고 사전입니다.</p>
+        </div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="rules">기재금지사항 (F01~F14)</div>
+        <div class="tab" data-tab="limits">영역별 최대 글자수</div>
+        <div class="tab" data-tab="codes">12대 공통요소 (C01~C12)</div>
+      </div>
+      <div class="card pad">
+        <input type="text" id="dictSearch" class="dict-search" placeholder="키워드로 검색 (예: 어학, 대회, 논문)">
+        <div id="dictTableWrap"></div>
+      </div>
+    </section>
+
+    <!-- ============ HISTORY ============ -->
+    <section id="view-history" class="view">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Session Log</div>
+          <h1 class="pagetitle">검토 이력</h1>
+          <p class="sub">현재 세션 동안 분석한 기록입니다. 새로고침하면 초기화됩니다 (개인정보 보호를 위해 서버·저장소에 남기지 않습니다).</p>
+        </div>
+        <button class="btn ghost sm" onclick="window.print()">리포트 인쇄/저장</button>
+      </div>
+      <div class="card" id="historyCard">
+        <div class="hist-empty">아직 분석한 기록이 없습니다. ‘분석 작업’ 탭에서 첫 검토를 시작해 보세요.</div>
+      </div>
+    </section>
+
+    <!-- ============ HELP ============ -->
+    <section id="view-help" class="view">
+      <div class="topline">
+        <div>
+          <div class="eyebrow">Guide</div>
+          <h1 class="pagetitle">도움말</h1>
+          <p class="sub">앱 사용법과 설계 원칙을 안내합니다.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card pad help-block">
+          <h3>이 앱의 구조 <span class="vpill">v1.8</span></h3>
+          <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
+        </div>
+        <div class="card pad help-block">
+          <h3>설계 원칙 (요약)</h3>
+          <p class="sub" style="margin:0;">1) 점수는 서술 완성도 지표이며 합격 예측이 아님 &nbsp;2) 사례 원문은 노출하지 않고 패턴만 제공 &nbsp;3) 최종 입력 권한과 책임은 교사에게 있음 &nbsp;4) 업로드한 파일과 API 키는 브라우저 밖으로 전송되지 않음(파일은 로컬 처리, API 키는 Anthropic 서버 호출에만 사용) &nbsp;5) 입력한 초안·이력은 ‘기록 초기화’를 누르기 전까지 이 브라우저에 남아 있음</p>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-top:16px;">
+        <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
+        <dl class="faq">
+          <dt>v1.8 — 종합 진단에 진로 희망분야 자동 검색 카드 추가</dt>
+          <dd>종합 진단 탭의 '현재 학년·학기' 바로 아래에 진로 희망분야 카드를 추가함. 불러온 생기부의 진로활동 기록에서 '희망분야' 표기를 학년별로 자동으로 찾아 보여줌. 페이지 병합 등으로 줄바꿈이 사라진 경우에도 다음 문장이 시작되는 지점에서 정확히 끊어 표시하도록 처리함.</dd>
+          <dt>v1.7 — AI 초안 작성 시 취약 공통요소를 집중 보완하도록 설정</dt>
+          <dd>AI 연계 병합 시, 기존 문구와 추가 자료를 합쳐 놓고 아직 충족되지 않은 공통요소를 찾아(전체 진단이 있으면 그중에서도 전체적으로 취약한 순서를 우선) 최대 3개까지 골라 프롬프트에 '집중 보완 요소'로 전달함. 관련 소재가 있으면 그 요소가 잘 드러나도록 비중 있게 서술하고, 소재가 전혀 없으면 억지로 끼워 넣지 않도록 규칙을 명시함. 결과 화면에 어떤 요소를 집중 보완하려 했는지, 실제로 충족되었는지(✓)를 함께 표시함.</dd>
+          <dt>v1.6 — 두 선택창의 상호 간섭 제거, AI 병합 글자수 계산 오류 수정</dt>
+          <dd>새로 작성할 내용의 학년을 바꾸면 지난 생기부 확인창의 학년도 따라 바뀌던 문제를 고쳐 두 선택창이 완전히 독립적으로 동작하도록 함. AI 연계 병합에서 목표 글자수를 '한도 − 기존 글자수'로 계산해, 기존 문구가 이미 한도를 넘는 경우 목표가 지나치게 작아져(심하면 40자) 한두 문장짜리 부실한 결과가 나오던 문제를 수정함 — 이제 목표는 항상 영역 전체 한도이며, 기존 문구가 한도를 넘는 경우에도 사실을 유지한 채 표현을 압축해 한도를 지키도록 안내함.</dd>
+          <dt>v1.5 — 지난 생기부 확인창을 화면 상단·전체 폭으로 분리, 독립 선택 가능</dt>
+          <dd>'지난 생기부 확인' 창을 원문 입력창 안에서 분리해 화면 맨 위, 화면 전체 폭을 쓰는 별도 영역으로 옮김. 지난 기록을 학년·학기·기재 영역·과목명으로 직접 선택해 확인할 수 있게 하고(과목명을 비우면 해당 영역 전체 확인), 그 아래에 새로 작성할 내용의 학년·학기·기재 영역·과목명·전형 유형·지원 계열 선택창을 별도 줄로 배치함. AI 연계 병합은 지난 기록 확인창의 선택과 무관하게, 지금 새로 작성 중인 항목을 기준으로 관련 기록을 자동으로 찾아 참고함.</dd>
+          <dt>v1.4 — 지난 생기부 내용 창을 항상 보이는 읽기 전용 창으로 개선</dt>
+          <dd>‘지난 생기부 내용’을 클릭해야 펼쳐지던 방식에서, 관련 기록이 있으면 바로 보이는 별도의 읽기 전용 창으로 바꿈. 원문 입력창과 시각적으로 분명히 구분되도록 배경·테두리를 다르게 주고 ‘여기서는 수정할 수 없다’는 안내를 명시함.</dd>
+          <dt>v1.3 — 종합 진단에 공통요소 설명 추가, 지난 기록을 참고한 AI 이어쓰기</dt>
+          <dd>‘종합 진단’ 탭의 취약 공통요소 목록에 각 요소가 무엇을 뜻하는지 설명을 함께 표시함(예시 문장은 규정·평가 사전 탭에서 확인). ‘분석 작업’ 탭에 지금 쓰려는 항목(세특은 같은 과목)과 관련된 지난 학기 기록을 보여주는 참고 패널을 추가함. AI 연계 병합 시 지난 기록과 자연스럽게 이어지는 지점이 있을 때만 가볍게 연결하고, 관련성이 없으면 언급하지 않도록 프롬프트를 조정함.</dd>
+          <dt>v1.2 — 학년/학기 작성 단위 재정비, 기록 유지, 대시보드 정리</dt>
+          <dd>자율·동아리·진로·행동특성(및 개인별 세특)은 학기 구분 없이 학년 전체가 하나의 이어지는 초안이 되도록 바꿈. 1~2학년 공통과목 7개 세특도 학기와 무관하게 하나의 초안(500자·1500바이트)으로 관리되도록 함. 항목(학년·학기·영역·과목)을 선택하면 기존에 저장한 초안을 자동으로 불러와 이어 쓸 수 있게 함. 입력한 초안·이력·불러온 파일이 ‘기록 초기화’를 누르기 전까지 새로고침해도 남아 있도록 저장 기능을 추가함. 역할이 모호했던 대시보드 탭을 없애고, 12대 공통요소 설명은 예시 문장과 함께 규정·평가 사전 탭으로 옮김. 분석 작업 탭에서 불필요한 학생 코드 입력란을 없앰. 리로스쿨·챗봇 등 자주 쓰는 사이트로 바로가기(기본 숨김) 기능과 작성한 초안 복사 버튼을 추가함.</dd>
+          <dt>v1.1 — 실제 파일 시뮬레이션 반영: PDF 줄 구조 복원, 과목 인식 개선, 글자수 기준 변경</dt>
+          <dd>PDF에서 텍스트를 뽑을 때 글자 조각을 단순히 이어붙이던 방식 대신, 화면에 보이는 줄 구조(좌표 기반)를 복원하도록 바꿔 표·세특 구간 인식 정확도를 높임. 세부능력 및 특기사항에서 콜론(:) 뒤에 오는 단어는 원칙적으로 과목명으로 인식해 별도 항목으로 분류하되, "합계·비고·이수학점"처럼 표 라벨은 과목명에서 제외함. 화면의 글자수 표시를 띄어쓰기를 제외하고 세도록 변경함(나이스 실제 입력 한도는 기존처럼 바이트 기준으로 별도 표시).</dd>
+          <dt>v1.0 — 2026학년도 1~2학년 기준 재검토 + 파일 불러오기 + AI 연계 병합 + 종합 진단</dt>
+          <dd>독서활동상황·봉사활동 특기사항을 코칭 대상에서 제외하고, 글자수 한도를 '학년 단위/공통과목 학기 합산' 기준으로 재설계함. 생기부 전체 파일(PDF·Excel·TXT) 업로드 후 영역별 자동 구간분리 기능(세특은 과목별로 개별 인식·불러오기 가능)과, 페이지가 나뉘며 같은 항목이 중복 인식되는 경우 자동 병합하는 기능을 추가함. 추가 자료를 기존 문구와 연계해 다시 쓰는 AI 병합 기능(Claude API, 키 미입력 시 규칙 기반 대체)을 추가함. 가장 먼저 접하도록 '종합 진단' 탭을 신설해 전체 학기·영역 기록 현황과 관심 계열 흐름을 진단하고, 과거 원문은 수정하지 않으면서 이번 학기·다음 학기에 보완할 점을 제안하는 기능을 추가함.</dd>
+          <dt>v0.1 — 최초 프로토타입</dt>
+          <dd>기재요령 기반 규정 검사기, 동국대 가이드북 기반 5축 정성 채점, 사례집 기반 12대 공통요소 나침반 제안 등 핵심 3모듈을 규칙 기반으로 구현함.</dd>
+        </dl>
+      </div>
+
+      <div class="card pad" style="margin-top:16px;">
+        <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">자주 묻는 질문</h3>
+        <dl class="faq">
+          <dt>글자수와 바이트는 왜 둘 다 보여주나요?</dt>
+          <dd>화면의 <b>글자수</b>는 한글/워드프로세서에서 흔히 쓰는 방식대로 띄어쓰기(공백)를 제외하고 셉니다. 반면 나이스(NEIS)의 실제 입력 한도는 Byte 단위이며 한글 1자를 3Byte, 공백을 1Byte로 계산해 띄어쓰기도 포함됩니다. 두 지표가 다른 기준이라 값이 다르게 보일 수 있어 함께 표시합니다 — 실제 나이스 입력 가능 여부는 <b>바이트</b> 값을 기준으로 확인해 주세요.</dd>
+          <dt>왜 자동으로 문장을 고쳐주지 않나요?</dt>
+          <dd>기재요령은 “생성형 AI가 만든 자료를 그대로 서술형 항목에 입력하는 행위”를 신뢰도 저해 사례로 명시하고 있습니다. 이 앱은 실제 관찰되지 않은 사실을 창작하지 않도록, 진단과 질문형 제안까지만 하고 최종 문장은 교사가 작성하도록 설계했습니다.</dd>
+          <dt>세 자료 중 무엇이 가장 중요한가요?</dt>
+          <dd>우선순위가 아니라 역할이 다릅니다. 기재요령을 어기면 아무리 잘 쓴 문장도 무효이므로 최우선 필터이고, 동국대 가이드북은 “잘 쓴 문장”의 기준을, 사례집은 “어떻게 그 기준에 도달했는지”의 실증 패턴을 제공합니다.</dd>
+          <dt>왜 독서활동상황과 봉사활동 특기사항은 다루지 않나요?</dt>
+          <dd>독서활동상황은 2024학년도 대입부터 상급학교 진학자료로 제공되지 않아(대입 미반영) 이번 버전에서는 코칭 대상에서 제외했습니다. 봉사활동은 2022 개정 교육과정부터 별도의 정성적 특기사항 없이 객관적 실적(50자)만 입력하도록 되어 있어, 마찬가지로 이번 버전의 범위에서 제외했습니다. 두 항목 모두 ‘규정·평가 사전 &gt; 영역별 최대 글자수’ 탭 하단에서 제외 사유를 확인할 수 있습니다.</dd>
+          <dt>글자수 한도가 왜 "학년 단위"로 계산되나요?</dt>
+          <dd>2026학년도 기재요령은 과목별 세부능력 및 특기사항을 제외한 모든 서술형 항목(자율·자치활동, 동아리활동, 진로활동, 행동특성 및 종합의견, 개인별 세특)의 최대 글자수를 학기가 아닌 <b>학년 단위</b>로 규정합니다. 이 앱에서는 이 항목들을 아예 학기 구분 없이 하나의 이어지는 초안으로 관리합니다 — 학년·영역(·과목)을 선택하면 지금까지 저장한 내용을 자동으로 불러오므로, 학기가 바뀌어도 같은 초안을 계속 이어서 고치면 됩니다.</dd>
+          <dt>공통과목 세특의 글자수 규칙은 무엇이 다른가요?</dt>
+          <dd>2022 개정 교육과정을 적용받는 1~2학년의 공통과목 7개(공통국어·공통수학·공통영어·통합사회·통합과학·한국사·과학탐구실험)는 1학기와 2학기의 세특을 합산해 500자 이내로 써야 합니다. 이 앱에서는 공통과목명을 입력하면 학기 구분 없이 하나의 초안(500자·1500바이트)으로 관리됩니다. 그 외 일반 선택과목은 과목당·학기당 각각 독립된 500자가 주어지며, 학기가 지나면 원칙적으로 다시 손대지 않습니다.</dd>
+          <dt>파일을 업로드하면 서버로 전송되나요?</dt>
+          <dd>아니요. PDF·엑셀·TXT 파일은 브라우저(자바스크립트) 안에서만 열리고 분석됩니다. 어떤 서버에도 파일이 업로드되지 않습니다. 다만 영역 인식은 제목 문구를 기준으로 한 자동 추정이므로, 불러온 뒤 영역·과목·학년이 올바른지 반드시 확인해 주세요.</dd>
+          <dt>AI 연계 병합 기능은 어떻게 동작하나요?</dt>
+          <dd>‘추가 자료’ 입력창에 새로 관찰한 메모를 적고 병합 버튼을 누르면, 기존 원문 입력창의 내용과 합쳐 하나의 문장으로 다시 씁니다. Anthropic API 키를 입력하면 Claude API가 실제로 문장을 생성하고, 키가 없으면 문장을 단순히 이어붙이는 규칙 기반 방식으로 대체됩니다. 어느 쪽이든 결과는 미리보기로만 표시되고, ‘이 초안을 원문에 적용’을 눌러야 실제 원문 입력창에 반영됩니다.</dd>
+          <dt>API 키는 안전한가요?</dt>
+          <dd>입력한 키는 이 브라우저 탭의 메모리에만 잠깐 보관되며 저장소에 기록되지 않고, Anthropic API 호출 외의 용도로 쓰이지 않습니다. 다만 이 방식은 개인 테스트·소규모 사용에 적합하며, 여러 교사가 함께 쓰는 정식 서비스로 확장할 때는 GAS 백엔드 등 서버 측에서 키를 관리하도록 구조를 바꾸는 것을 권장합니다.</dd>
+          <dt>입력한 내용이 새로고침해도 남아 있나요?</dt>
+          <dd>이 파일을 다운로드해서 직접 열거나 별도 서버·GAS 등에 올려 사용하는 경우에는 브라우저 저장소에 남아 있어 새로고침해도 유지되며, ‘종합 진단’ 탭의 ‘🗑 기록 초기화’ 버튼을 눌러야만 지워집니다. 다만 claude.ai 채팅 안의 미리보기 화면처럼 저장소 접근이 막힌 환경에서는 저장이 되지 않을 수 있고, 그 경우 세션 동안은 정상 동작하되 새로고침하면 초기화됩니다.</dd>
+          <dt>항목을 다시 선택했더니 입력창 내용이 바뀌었어요.</dt>
+          <dd>의도된 동작입니다. 학년·학기·영역·과목을 바꾸면 그 항목에 이미 저장된 초안이 있는지 확인해서, 있으면 자동으로 불러오고 없으면 빈 칸으로 둡니다. 지금 입력 중인 내용을 남기고 싶다면 선택을 바꾸기 전에 먼저 ‘분석하기’를 눌러 저장해 주세요.</dd>
+        </dl>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+/* =========================================================
+   0. DATA — 기재요령(①) · 동국대 가이드북(②) · 사례집(③) 기반
+   ========================================================= */
+
+/*
+  2026학년도 기재요령 재검토 반영 (1~2학년, 2022 개정 교육과정 기준)
+  - 독서활동상황: 2024학년도 대입부터 상급학교 진학자료로 미제공 → 이 도구의 코칭 대상에서 제외(기록 안 함)
+  - 봉사활동: 2022 개정 교육과정부터 별도 특기사항이 없고 '실적'(50자, 객관적 사실)만 입력하며
+    정성 평가내용 입력이 불가하므로(§봉사활동 실적 다항) → 코칭 대상에서 제외(특기 기재 안 함)
+  - 최대 글자수 기준은 원칙적으로 '학년 단위'임(과목별 세특은 예외) → 자율·동아리·진로·행발·개인별세특은
+    학기별로 나누어 입력해도 한 학년 전체에서 하나의 글자수 한도를 공유함(budget:'year')
+  - 세특(과목별)은 원칙적으로 '과목당 학기별' 한도이나, 2022 개정 교육과정을 적용받는 1~2학년의
+    공통과목(공통국어·공통수학·공통영어·통합사회·통합과학·한국사·과학탐구실험) 7개는 1·2학기 합산 500자
+    (budget:'commonYear' — 학년 내 두 학기 합산 500자 공유, 그 외 과목은 budget:'semester')
+*/
+const COMMON_SUBJECTS_1_2 = ['공통국어','공통수학','공통영어','통합사회','통합과학','한국사','과학탐구실험'];
+
+const AREAS = [
+  {key:'자율활동',    label:'자율·자치활동 특기사항', label3:'자율활동 특기사항', limit:500, subject:false, budget:'year'},
+  {key:'동아리활동',  label:'동아리활동 특기사항',     limit:500, subject:false, budget:'year'},
+  {key:'진로활동',    label:'진로활동 특기사항',       limit:500, subject:false, budget:'year'},
+  {key:'세특_과목별', label:'세부능력 및 특기사항(과목별)', limit:500, subject:true,  budget:'semester'},
+  {key:'세특_개인별', label:'세부능력 및 특기사항(개인별)', limit:500, subject:false, budget:'year'},
+  {key:'행동특성',    label:'행동특성 및 종합의견',    limit:300, subject:false, budget:'year'},
+];
+// 2026 기재요령에는 있으나 이번 버전에서 의도적으로 제외한 영역(사유는 도움말·사전 탭에 안내)
+const EXCLUDED_AREAS = [
+  {key:'독서_공통', label:'독서활동상황(공통)', limit:500, reason:'2024학년도 대입부터 상급학교 진학 시 미제공(대입 미반영)되어 이번 버전에서는 기록하지 않습니다.'},
+  {key:'독서_과목별', label:'독서활동상황(과목별)', limit:250, reason:'2024학년도 대입부터 상급학교 진학 시 미제공(대입 미반영)되어 이번 버전에서는 기록하지 않습니다.'},
+  {key:'봉사활동', label:'봉사활동실적 활동내용', limit:50, reason:'2022 개정 교육과정부터 정성적 특기사항 입력이 불가하고 객관적 실적(50자)만 입력하는 항목이라, 이번 버전에서는 특기사항 코칭 대상에서 제외합니다.'},
+];
+
+const TRACKS = {
+  '인문':['언어','문학','철학','역사','인문학적','고전','문헌','서사'],
+  '사회':['사회','정책','제도','법','경제','통계','여론','공동체'],
+  '자연':['실험','가설','수학적','물리','화학','생명','원리','데이터'],
+  '공학':['설계','알고리즘','시스템','회로','구조','제작','프로토타입','공학적'],
+  '의료·생명':['생명','인체','질병','임상','건강','약리','간호','환자'],
+  '교육':['교육과정','학습자','수업','또래','멘토','교수법','성취기준'],
+  '예술·미디어':['창작','영상','디자인','미학','연출','스토리텔링','미디어'],
+  '기타':['탐구','진로','활동','역량']
+};
+
+// 기재금지사항 F01~F14 (기재요령 §1.1.2)
+const F_RULES = [
+  {code:'F01', label:'공인어학시험 참여·성적', clause:'유의사항 3-가: TOEIC·TOEFL·TEPS·HSK·JPT 등 공인어학시험은 어떠한 항목에도 기재 불가',
+    re:/TOEIC|TOEFL|TEPS|HSK|JPT|JLPT|DELF|DALF|ZD|TESTDAF|DSH|DSD|TORFL|DELE|토익|토플|텝스|한자능력검정|한자급수/gi, sev:'certain'},
+  {code:'F02', label:'교내외 대회 참여·성적·수상', clause:'유의사항 3-나: 대회 참여 사실·성적·수상실적은 ‘수상경력’ 외 기재 불가(교외대회는 학교장 허락 여부 무관 전면 불가)',
+    re:/(교내|교외|전국|시도)?\s?(경시대회|올림피아드|콘테스트|대회)(에서)?\s?(수상|입상|참가|참여|출전)/g, sev:'certain'},
+  {code:'F03', label:'교외상(표창장·감사장·공로상 등)', clause:'유의사항 3-다: 교외 기관·단체가 수여한 표창장·감사장·공로상 등 기재 불가',
+    re:/(표창장|감사장|공로상|공로장)/g, sev:'certain'},
+  {code:'F04', label:'교내외 인증시험 참여·성적', clause:'유의사항 3-라: 교내외 인증시험 참여 사실이나 성적 기재 불가',
+    re:/인증시험(에|을)?\s?(응시|합격|참여)/g, sev:'suspect'},
+  {code:'F05', label:'모의고사·학력평가 성적', clause:'유의사항 3-마: 모의고사·전국연합학력평가 성적(원점수·석차·석차등급·백분위 등) 기재 불가',
+    re:/(모의고사|전국연합학력평가|모의평가)[^.]{0,15}(등급|백분위|원점수|석차)|백분위\s?\d{1,3}|전국\s?\d{1,3}\s?등급/g, sev:'certain'},
+  {code:'F06', label:'논문 투고·등재·학회발표', clause:'유의사항 3-바: 학회지 투고·등재, 학회 발표 사실 기재 불가',
+    re:/논문[^.]{0,10}(투고|등재|게재|발표)/g, sev:'certain'},
+  {code:'F07', label:'도서출간 사실', clause:'유의사항 3-사: 도서출간 사실 기재 불가',
+    re:/(책|도서)(을|를)?\s?(직접\s)?(출간|출판)(함|하였|했)/g, sev:'suspect'},
+  {code:'F08', label:'지식재산권 출원·등록', clause:'유의사항 3-아: 특허·실용신안·상표·디자인 등 출원 또는 등록 사실 기재 불가',
+    re:/(특허|실용신안|상표권|디자인권)[^.]{0,8}(출원|등록)/g, sev:'certain'},
+  {code:'F09', label:'해외 활동실적(어학연수·해외봉사 등)', clause:'유의사항 3-자: 어학연수, 해외봉사 등 해외 활동실적 및 관련 내용 기재 불가',
+    re:/(어학연수|해외\s?봉사|해외\s?캠프|해외\s?연수)/g, sev:'certain'},
+  {code:'F10', label:'부모(친인척)의 사회·경제적 지위 암시', clause:'유의사항 3-차: 부모(친인척 포함)의 직종·직업·직장·직위 등을 암시하는 내용 기재 불가',
+    re:/(아버지|어머니|부모님|친인척)[^.]{0,14}(대표|사장|원장|교수|변호사|의사|판사|검사|직장|병원장|병원|약국|회사|기업|법률사무소|CEO|운영하는)/g, sev:'suspect'},
+  {code:'F11', label:'장학생·장학금 관련', clause:'유의사항 3-카: 장학생·장학금 관련 내용 기재 불가',
+    re:/장학(생|금)/g, sev:'certain'},
+  {code:'F12', label:'특정 대학명·기관명·상호명·강사명', clause:'유의사항 3-타: 구체적인 특정 대학명·기관명(교육관련기관 제외)·상호명·강사명 기재 불가',
+    re:/(서울대|연세대|고려대|카이스트|KAIST|포스텍|성균관대|한양대|중앙대|경희대|이화여대)(학교)?/g, sev:'suspect'},
+  {code:'F13', label:'자격증 명칭 및 취득 사실', clause:'유의사항 3-파: 자격증 명칭 및 취득 사실은 ‘자격증취득상황’ 이외 항목에 기재 불가',
+    re:/자격증(을|를)?\s?(취득|합격)(함|하였|했)/g, sev:'certain'},
+  {code:'F14', label:'소속 고교를 특정할 수 있는 표현', clause:'유의사항 4: 학교명·재단명·학교 축제명·별칭 등 재학 고교를 알 수 있는 내용은 인적·학적사항 등 일부를 제외하고 기재 불가',
+    re:/(고등학교\s?축제|우리\s?학교\s?이름|본교\s?명칭)/g, sev:'suspect'},
+];
+
+// 12대 공통요소 C01~C12 (가이드북 2장)
+const C_RULES = [
+  {code:'C01', name:'4단 서사구조', desc:'계기→과정→결과→성장(WHAT-WHY-HOW-SO WHAT)이 모두 드러나는가',
+    long:'활동을 왜 시작했는지(계기), 무엇을 어떻게 했는지(과정), 그래서 어떤 결과가 나왔는지(결과), 그 경험으로 무엇을 배우거나 관점이 어떻게 넓어졌는지(성장)까지 하나의 흐름으로 이어지는 서술입니다. 넷 중 하나라도 빠지면 "그래서 무엇을 얻었는가"가 흐릿해집니다.',
+    example:'미세플라스틱 문제에 관심을 갖게 되어 해양생물 표본을 채집해 함유량을 분석함. 예상보다 높은 수치를 확인하고, 이후 일상 속 플라스틱 사용 습관을 점검하는 캠페인을 기획함.',
+    test:t=>hit(t,K.motive)&&hit(t,K.process)&&hit(t,K.growth)},
+  {code:'C02', name:'교과·수행평가 출발', desc:'대학 수준 선행이 아닌 교과 수업·수행평가에서 출발했는가',
+    long:'대학 전공 서적을 미리 읽었다는 식의 "선행"보다, 실제 수업 시간에 배운 개념이나 수행평가 과제에서 자연스럽게 출발한 탐구가 더 설득력 있게 읽힙니다. 고교 교육과정 범위 안에서 얼마나 깊이 파고들었는지가 핵심입니다.',
+    example:'수학 수행평가로 진행한 통계 프로젝트에서 학급 학생들의 수면 시간을 조사하고 표준편차를 계산해 발표함.',
+    test:t=>hit(t,K.classroom)},
+  {code:'C03', name:'전공·진로 연계', desc:'선택한 지원 계열의 역량 키워드와 연결되는가',
+    long:'전공명을 직접 반복해서 언급하기보다, 그 전공에서 요구하는 사고방식이나 역량이 자연스럽게 드러나는 서술이 더 설득력 있습니다(예: 공학 지망이라면 "문제를 구조적으로 분해해 해결하는 태도").',
+    example:'설계도를 반복 수정하며 오차 범위를 줄여나가는 과정에서 문제를 구조적으로 분해해 해결하는 태도를 기름.',
+    test:t=>false /* track별 별도 판정 */},
+  {code:'C04', name:'3축 균형', desc:'학업역량·전공(진로)적합성·인성 요소가 함께 나타나는가',
+    long:'지식 습득이나 성취(학업역량)만 강조하면 밋밋해집니다. 협력, 배려, 책임감 같은 인성적 요소가 학업 활동 안에서 자연스럽게 함께 드러날 때 균형 잡힌 서술이 됩니다.',
+    example:'실험 데이터를 꼼꼼히 분석하는 동시에, 결과 해석에 이견이 있는 조원의 의견을 끝까지 듣고 절충안을 제시함.',
+    test:t=>hit(t,K.classroom.concat(K.process))&&hit(t,K.social)},
+  {code:'C05', name:'구체성(수치·방법론)', desc:'추상적 감상이 아닌 구체적 수치·자료·방법을 제시했는가',
+    long:'"열심히 했다", "느낀 점이 많았다" 같은 표현은 평가자에게 아무 정보도 주지 못합니다. 몇 명을 조사했는지, 어떤 도구·방법을 썼는지, 수치가 어땠는지를 구체적으로 밝혀야 진짜 탐구로 읽힙니다.',
+    example:'설문 응답자 84명의 자료를 엑셀로 정리해 학년별 평균 수면 시간을 비교 분석함.',
+    test:t=>hit(t,K.concrete)||/\d/.test(t)},
+  {code:'C06', name:'역할의 주도성', desc:'조장·발표 등 구체적 역할과 행동이 드러나는가',
+    long:'"참여함"으로 끝나면 그 학생이 정확히 무엇을 했는지 알 수 없습니다. 조장, 발표자, 자료조사 담당처럼 구체적인 역할과 그 역할 안에서의 행동을 밝혀야 주도성이 드러납니다.',
+    example:'모둠의 자료조사를 총괄하며 팀원별 조사 주제를 배분하고 진행 상황을 점검함.',
+    test:t=>hit(t,K.lead)},
+  {code:'C07', name:'협업·소통 과정', desc:'의견 조율·협력 과정이 구체적으로 서술되었는가',
+    long:'단순히 "협력했다"는 진술보다, 의견 차이가 있었을 때 어떤 방식으로 조율했는지 과정을 보여주면 실제 협업 역량이 드러납니다.',
+    example:'실험 방법에 대한 의견 차이가 있었으나, 각 방법의 장단점을 표로 정리해 비교한 뒤 팀 합의를 이끌어냄.',
+    test:t=>hit(t,K.collab)},
+  {code:'C08', name:'어려움과 극복', desc:'시행착오·한계와 이를 극복한 과정이 있는가',
+    long:'모든 게 순조로웠다는 서술은 오히려 비현실적으로 읽힙니다. 겪은 어려움이나 예상과 다른 결과, 그리고 이를 해결해 나간 과정을 포함하면 성장 서사가 훨씬 설득력 있어집니다.',
+    example:'초기 실험에서 예상과 다른 결과가 나와 변수 통제에 오류가 있었음을 발견하고, 절차를 재설계해 재실험함.',
+    test:t=>hit(t,K.trouble)},
+  {code:'C09', name:'심화·확장 연쇄', desc:'다른 교과·동아리·진로로 자연스럽게 확장되었는가',
+    long:'한 번의 활동으로 끝나지 않고 다른 교과, 동아리, 진로활동으로 이어질 때 "일시적 흥미"가 아니라 "지속적 탐구"로 읽힙니다. 확장의 계기를 함께 밝혀주면 더 좋습니다.',
+    example:'이 탐구를 계기로 동아리에서 관련 주제를 심화 탐구하고, 진로활동에서 관련 학과 탐방으로 이어감.',
+    test:t=>hit(t,K.expand)},
+  {code:'C10', name:'기재금지사항 배제', desc:'F01~F14에 해당하는 표현이 없는가',
+    long:'어학시험 점수, 교외 수상, 모의고사 성적, 특정 대학명 등 기재요령이 금지한 표현이 섞여 있지 않은지 확인하는 항목입니다. 이 요소는 별도 예시 없이 "규정 준수 검사" 결과를 그대로 따릅니다.',
+    example:null,
+    test:null /* compliance 결과로 판정 */},
+  {code:'C11', name:'형식 준수', desc:'명사형 종결, 특수문자·번호매기기 지양 등 형식을 지켰는가',
+    long:'문장은 "~함", "~보임"처럼 명사형 어미로 끝나야 하고, ①②③ 같은 번호매기기나 특수문자(★, ~~, !!)는 쓰지 않는 것이 원칙입니다.',
+    example:'(O) 실험을 설계하고 수행함.   (X) 실험을 설계하고 수행했다!! ①',
+    test:t=>!/[①②③④⑤]|[0-9]\)\s|[*#>~]{2,}/.test(t)},
+  {code:'C12', name:'학년간 스토리라인 일관성', desc:'이전 학기 기록과 관심사가 자연스럽게 이어지는가',
+    long:'한 학기만 보면 알 수 없고, 여러 학기 기록을 함께 볼 때 판단할 수 있는 요소입니다. ‘종합 진단’ 탭에서 파일을 불러오면 학기별 흐름을 참고해 이 요소를 점검할 수 있습니다.',
+    example:'1학년 화학 실험에서 시작된 관심이 2학년 진로활동의 관련 학과 탐색으로 자연스럽게 이어짐.',
+    test:null},
+];
+
+const K = {
+  motive:['관심을 가지','흥미를 느끼','계기','궁금증','의문을 갖','호기심'],
+  process:['조사','분석','탐구','설계','실험','제작','발표','조작','수행','작성'],
+  growth:['깨닫','배우게','배움','성장','다짐','알게 됨','되었다','느끼게','생각하게 됨'],
+  classroom:['수업 시간','교과','단원','배운 내용','수행평가'],
+  social:['협력','소통','배려','책임감','공동체','역할'],
+  concrete:['수치','데이터','통계','그래프','%','실험','측정','방법론','설문'],
+  lead:['주도','리더','팀장','조장','이끌','맡아','자처'],
+  collab:['협력','소통','조율','의견을 나누','모둠원','팀원','합의'],
+  trouble:['어려움','문제가 발생','시행착오','한계','실패','갈등','오류'],
+  expand:['이후','이를 계기로','더 나아가','심화','확장','연계하여','연결지어'],
+};
+function hit(text, words){ return words.some(w=>text.includes(w)); }
+
+const TIPS = [
+  '세특은 대학 수준 심화 지식보다 “교육과정 범위 안에서 얼마나 주도적으로 참여했는가”를 우선 보여주세요.',
+  '결과만 나열하지 말고 “어떤 어려움을 겪었고 어떻게 해결했는지”를 한 문장 더해보세요.',
+  '동아리·진로·교과 세특이 서로 연결되면 평가자는 “일시적 관심”이 아니라 “지속적 탐구”로 읽습니다.',
+  '문장은 명사형 어미로 종결하고, 번호(①②)나 특수문자는 지양하세요.',
+  '전공명을 반복해서 언급하기보다, 그 전공에 필요한 “역량”이 드러나는 문장을 쓰세요.',
+  '모의고사 등급·수상 실적·자격증명은 세특·행발 어디에도 기재할 수 없습니다.',
+];
+
+/* =========================================================
+   1. STATE
+   ========================================================= */
+const state = { history: [], slots: {} }; // history: 화면표시용 로그(append-only) / slots: 예산 계산용 최신 저장본(항목별 최신 초안)
+let currentTermOverride = null; // '현재 학년·학기' — 교사가 지정하면 종합진단의 이번학기/다음학기 판정 기준이 됨
+
+/* =========================================================
+   1-B. 저장소(localStorage) — '기록 초기화'를 누르기 전까지 새로고침해도 입력 내용이 남도록 함
+   claude.ai 안의 미리보기 화면에서는 브라우저 저장소가 막혀 있어 저장되지 않을 수 있다(그 경우
+   세션 동안은 정상 동작하되 새로고침 시 초기화됨). 다운로드한 파일을 직접 열거나 별도 서버에
+   올려서 사용하면 정상적으로 저장된다. 저장소를 쓸 수 없어도 앱이 죽지 않도록 항상 try-catch로 감싼다.
+   ========================================================= */
+const STORAGE_KEY = 'nachimban_records_v1';
+let storageAvailable = true;
+function saveToStorage(){
+  if(!storageAvailable) return;
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      slots: state.slots, history: state.history,
+      importedSegments: (typeof importedSegments!=='undefined') ? importedSegments : [],
+      currentTermOverride
+    }));
+  }catch(e){ storageAvailable = false; }
+}
+function loadFromStorage(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    state.slots = data.slots || {};
+    state.history = data.history || [];
+    if(typeof importedSegments!=='undefined') importedSegments = data.importedSegments || [];
+    currentTermOverride = data.currentTermOverride || null;
+    return true;
+  }catch(e){ storageAvailable = false; return false; }
+}
+function resetAllRecords(){
+  if(!confirm('저장된 모든 초안·검토 이력·불러온 파일 데이터를 지웁니다. 이 작업은 되돌릴 수 없습니다. 계속할까요?')) return;
+  state.slots = {}; state.history = [];
+  if(typeof importedSegments!=='undefined') importedSegments = [];
+  currentTermOverride = null;
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  clearWork();
+  renderHistory();
+  if(typeof renderSegments==='function') renderSegments([]);
+  if(typeof updateImportBadge==='function') updateImportBadge();
+  if(typeof renderOverview==='function') renderOverview();
+  if(typeof renderCareerHopes==='function') renderCareerHopes();
+  const g = document.getElementById('curGradeSel'), s = document.getElementById('curSemSel');
+  if(g) g.value='1'; if(s) s.value='1';
+  alert('초기화되었습니다.');
+}
+
+
+/* =========================================================
+   2. NAV
+   ========================================================= */
+function goTo(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.rail-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+}
+document.querySelectorAll('.rail-btn').forEach(b=>b.addEventListener('click', ()=>goTo(b.dataset.view)));
+
+/* =========================================================
+   3. INIT FORM OPTIONS
+   ========================================================= */
+function parseGrade(){
+  const grade = Number(document.getElementById('inGrade').value);
+  const semester = Number(document.getElementById('inSem').value);
+  return {grade, semester, is12:(grade===1||grade===2)};
+}
+function areaLabel(a, gradeInfo){
+  if(a.key==='자율활동') return gradeInfo.grade===3 ? a.label3 : a.label;
+  return a.label;
+}
+function fillAreaOptionsInto(selectEl, gradeInfo){
+  const prevVal = selectEl.value;
+  selectEl.innerHTML = '';
+  AREAS.forEach(a=>{
+    const o=document.createElement('option'); o.value=a.key;
+    o.textContent = `${areaLabel(a,gradeInfo)} (최대 ${a.limit}자 · ${a.budget==='semester'?'학기 단위':'학년 단위'})`;
+    selectEl.appendChild(o);
+  });
+  if(prevVal) selectEl.value = prevVal;
+}
+function fillAreaOptions(){
+  fillAreaOptionsInto(document.getElementById('inArea'), parseGrade());
+}
+function fillPastAreaOptions(){
+  fillAreaOptionsInto(document.getElementById('pastArea'), parsePastGrade());
+}
+function parsePastGrade(){
+  const grade = Number(document.getElementById('pastGrade').value);
+  const semester = Number(document.getElementById('pastSem').value);
+  return {grade, semester, is12:(grade===1||grade===2)};
+}
+function currentPastAreaMeta(){
+  return AREAS.find(a=>a.key===document.getElementById('pastArea').value) || AREAS[0];
+}
+// 학년·학기·영역·과목 중 하나라도 바뀌면: ①과목 입력창 표시여부 ②학기 선택창 표시여부(자율·동아리·진로·행발·
+// 개인별세특은 학기 구분이 없으므로 숨김) ③해당 항목에 이미 저장된 초안이 있으면 자동으로 불러와 이어 쓸 수 있게 한다.
+// 아울러 '지난 생기부 확인' 선택창도 기본값으로 같은 항목을 가리키도록 맞춰준다(그 뒤 사용자가 따로 바꾸면 그대로 유지됨).
+function syncSelection(){
+  fillAreaOptions();
+  const meta = currentAreaMeta();
+  document.getElementById('subjectField').style.display = meta.subject ? 'block':'none';
+  document.getElementById('semField').style.display = (meta.budget==='year') ? 'none':'block';
+  loadSlotIntoEditor();
+}
+function syncPastSelection(){
+  fillPastAreaOptions();
+  const meta = currentPastAreaMeta();
+  document.getElementById('pastSubjectField').style.display = meta.subject ? 'block':'none';
+  document.getElementById('pastSemField').style.display = (meta.budget==='year') ? 'none':'block';
+  renderPastRecords();
+}
+function loadSlotIntoEditor(){
+  const meta = currentAreaMeta();
+  const g = parseGrade();
+  const subject = document.getElementById('inSubject').value;
+  const key = slotKey(meta, g, subject);
+  const slot = state.slots[key];
+  document.getElementById('rawText').value = slot ? slot.text : '';
+  updateMeters();
+}
+// '지난 생기부 확인' 선택창(학년·학기·영역·과목)에 맞는 업로드된 기록을 찾는다. 과목명을 비워두면
+// 해당 영역 전체를 보여준다.
+function getPastRecords(){
+  if(typeof importedSegments==='undefined' || !importedSegments.length) return [];
+  const meta = currentPastAreaMeta();
+  const g = parsePastGrade();
+  const subject = document.getElementById('pastSubject').value;
+  const semVisible = document.getElementById('pastSemField').style.display !== 'none';
+  return importedSegments.filter(s=>{
+    if(s.excluded || !s.text) return false;
+    if(s.area !== meta.key) return false;
+    if(meta.subject && subject.trim()){
+      if(normSubj(s.subject||'') !== normSubj(subject)) return false;
+    }
+    if(!s.gradeHint) return true;
+    const [sg, ss] = s.gradeHint.split('-').map(Number);
+    if(sg !== g.grade) return false;
+    if(semVisible && ss !== g.semester) return false;
+    return true;
+  }).sort((a,b)=>{
+    const pa = a.gradeHint ? a.gradeHint.split('-').map(Number) : [0,0];
+    const pb = b.gradeHint ? b.gradeHint.split('-').map(Number) : [0,0];
+    return (pa[0]*10+pa[1]) - (pb[0]*10+pb[1]);
+  });
+}
+// AI 연계 병합용 지난 기록은 '지금 새로 작성 중인 항목'(위쪽 지난기록 확인창의 선택과는 무관)을 자동으로 따라간다.
+function getRelevantPastForMerge(){
+  if(typeof importedSegments==='undefined' || !importedSegments.length) return [];
+  const meta = currentAreaMeta();
+  const subject = document.getElementById('inSubject').value;
+  return importedSegments.filter(s=>{
+    if(s.excluded || !s.text) return false;
+    if(s.area !== meta.key) return false;
+    if(meta.subject){
+      if(!subject.trim()) return false;
+      return normSubj(s.subject||'') === normSubj(subject);
+    }
+    return true;
+  }).sort((a,b)=>{
+    const pa = a.gradeHint ? a.gradeHint.split('-').map(Number) : [0,0];
+    const pb = b.gradeHint ? b.gradeHint.split('-').map(Number) : [0,0];
+    return (pa[0]*10+pa[1]) - (pb[0]*10+pb[1]);
+  });
+}
+function renderPastRecords(){
+  const records = getPastRecords();
+  const body = document.getElementById('pastRecordsBody');
+  const hint = document.getElementById('pastRecordsHint');
+  if(records.length===0){
+    body.innerHTML = `<div class="past-empty">선택한 조건에 해당하는 지난 기록이 없습니다.</div>`;
+    hint.textContent = '위에서 학년·학기·영역(·과목)을 선택해 지난 기록을 확인하세요. 여기서는 수정할 수 없으며, 아래 원문 입력창과는 별개입니다.';
+    return;
+  }
+  body.innerHTML = records.map(r=>
+    `<div class="past-item"><div class="past-meta">${r.gradeHint? termLabel(r.gradeHint):'학년 미상'}${r.subject? ' · '+escapeHtml(r.subject):''}</div><div class="past-text">${escapeHtml(r.text)}</div></div>`
+  ).join('');
+  hint.textContent = `${records.length}건 표시 중 — 여기서는 수정할 수 없으며, 아래 원문 입력창과는 별개입니다.`;
+}
+function initForm(){
+  const areaSel = document.getElementById('inArea');
+  fillAreaOptions();
+  document.getElementById('inGrade').addEventListener('change', syncSelection);
+  document.getElementById('inSem').addEventListener('change', syncSelection);
+  areaSel.addEventListener('change', syncSelection);
+  document.getElementById('inSubject').addEventListener('change', loadSlotIntoEditor);
+  syncSelection();
+
+  document.getElementById('pastGrade').addEventListener('change', syncPastSelection);
+  document.getElementById('pastSem').addEventListener('change', syncPastSelection);
+  document.getElementById('pastArea').addEventListener('change', syncPastSelection);
+  document.getElementById('pastSubject').addEventListener('input', renderPastRecords);
+  syncPastSelection();
+
+  const trackSel = document.getElementById('inTrack');
+  Object.keys(TRACKS).forEach(t=>{
+    const o=document.createElement('option'); o.value=t; o.textContent=t; trackSel.appendChild(o);
+  });
+
+  document.getElementById('rawText').addEventListener('input', updateMeters);
+  document.getElementById('inSubject').addEventListener('input', updateMeters);
+  updateMeters();
+}
+function currentAreaMeta(){
+  return AREAS.find(a=>a.key===document.getElementById('inArea').value) || AREAS[0];
+}
+
+/* =========================================================
+   4. METERS (char / byte) — 2026 기재요령 1~2학년 기준
+   자율·동아리·진로·행동특성(및 개인별세특)은 학기 구분 없이 학년 전체가 하나의 연속된 초안이다.
+   세특(과목별)은 원칙적으로 학기마다 별도 항목이며 학기가 지나면 다시 손대지 않는 것이 원칙이지만,
+   1~2학년 공통과목 7개는 예외적으로 1·2학기를 합쳐 하나의 초안(500자/1500바이트)으로 관리한다.
+   ========================================================= */
+function byteLen(text){
+  let b=0;
+  for(const ch of text){
+    if(ch==='\n'){ b+=1; continue; }
+    b += (ch.charCodeAt(0) > 127) ? 3 : 1;
+  }
+  return b;
+}
+// 글자수(화면 표시용)는 띄어쓰기(공백·탭·줄바꿈)를 제외하고 센다. 바이트 수는 나이스 실제 입력 한도와
+// 맞추기 위해 공백도 포함해서 그대로 계산한다(두 지표가 다른 기준을 쓰는 이유는 도움말에 안내되어 있음).
+function charCount(text){
+  return [...text.replace(/\s/g,'')].length;
+}
+function isCommonSubject(name, gradeInfo){
+  if(!gradeInfo.is12 || !name) return false;
+  const n = name.trim().replace(/\s/g,'');
+  return COMMON_SUBJECTS_1_2.some(c=>n===c || n===c.replace('공통',''));
+}
+function isYearUnit(meta, subject, gradeInfo){
+  if(meta.budget==='year') return true;
+  if(meta.key==='세특_과목별' && isCommonSubject(subject, gradeInfo)) return true;
+  return false;
+}
+// 저장 슬롯 키: 학기 구분이 없는 항목(학년 단위/공통과목)은 학기를 키에서 아예 빼서 '하나의 연속된 초안'으로 관리하고,
+// 그 외 과목별 세특은 학기별로 별도 슬롯을 둔다. 같은 슬롯을 다시 저장하면 이전 내용을 덮어쓴다(=이어서 수정).
+function slotKey(meta, gradeInfo, subject){
+  if(isYearUnit(meta, subject, gradeInfo)) return `${meta.key}|${gradeInfo.grade}|${(subject||'').trim()}`;
+  return `${meta.key}|${gradeInfo.grade}|${gradeInfo.semester}|${(subject||'').trim()}`;
+}
+function updateMeters(){
+  const text = document.getElementById('rawText').value;
+  const meta = currentAreaMeta();
+  const g = parseGrade();
+  const subject = document.getElementById('inSubject').value;
+
+  const chars = charCount(text);
+  const bytes = byteLen(text);
+  const charLimit = meta.limit;
+  const byteLimit = meta.limit*3;
+
+  document.getElementById('charLabel').textContent = `${chars} / ${charLimit}`;
+  document.getElementById('byteLabel').textContent = `${bytes} / ${byteLimit}`;
+  const cf = document.getElementById('charFill'), bf = document.getElementById('byteFill');
+  const cp = Math.min(100, chars/charLimit*100), bp = Math.min(100, bytes/byteLimit*100);
+  cf.style.width = cp+'%'; bf.style.width = bp+'%';
+  cf.style.background = cp>100? 'var(--brick)': cp>85? 'var(--gold)':'var(--teal)';
+  bf.style.background = bp>100? 'var(--brick)': bp>85? 'var(--gold)':'var(--teal)';
+
+  const badge = document.getElementById('curriBadge');
+  badge.textContent = g.is12 ? '2022 개정 교육과정 · 1~2학년 기준' : '3학년(전환 학년) 기준';
+
+  const key = slotKey(meta, g, subject);
+  const hasSaved = !!state.slots[key];
+  const note = document.getElementById('budgetNote');
+  if(meta.key==='세특_과목별' && isCommonSubject(subject, g)){
+    note.innerHTML = `※ <b>공통과목</b>은 학기 구분 없이 1년 내내 하나의 초안(500자·1500바이트)으로 관리됩니다.${hasSaved?' 이전에 저장한 내용을 불러왔습니다 — 이어서 고치면 됩니다.':' 아직 저장된 초안이 없습니다.'}`;
+  } else if(meta.key==='세특_과목별'){
+    note.innerHTML = `※ 세특(과목별)은 과목당 학기별로 독립적인 500자·1500바이트가 주어지며, 학기가 지나면 다시 수정하지 않는 것이 원칙입니다.${hasSaved?' 이 학기에 저장한 초안을 불러왔습니다.':''}`;
+  } else {
+    note.innerHTML = `※ 이 영역은 학기 구분 없이 <b>학년 전체가 하나의 초안</b>입니다(500자, 행동특성은 300자).${hasSaved?' 이전에 저장한 내용을 불러왔습니다 — 이어서 고치면 됩니다.':' 아직 저장된 초안이 없습니다.'}`;
+  }
+}
+// 리로스쿨/챗봇 등 자주 쓰는 외부 사이트 링크 — 기본 숨김, 입력한 주소는 브라우저에 저장해 둔다
+function toggleLinksPanel(){
+  document.getElementById('linksPanel').classList.toggle('open');
+}
+function normalizeUrl(u){
+  u = (u||'').trim();
+  if(!u) return '';
+  if(!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u;
+}
+function openQuickLink(id){
+  const el = document.getElementById(id);
+  const url = normalizeUrl(el.value);
+  if(!url){ alert('먼저 주소를 입력해 주세요.'); return; }
+  el.value = url;
+  saveQuickLinks();
+  window.open(url, '_blank', 'noopener');
+}
+function saveQuickLinks(){
+  try{
+    localStorage.setItem('nachimban_links', JSON.stringify({
+      reroschool: document.getElementById('linkReroschool').value,
+      chatbot: document.getElementById('linkChatbot').value
+    }));
+  }catch(e){}
+}
+function loadQuickLinks(){
+  try{
+    const raw = localStorage.getItem('nachimban_links');
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.reroschool) document.getElementById('linkReroschool').value = data.reroschool;
+    if(data.chatbot) document.getElementById('linkChatbot').value = data.chatbot;
+  }catch(e){}
+}
+
+function copyDraft(){
+  const text = document.getElementById('rawText').value;
+  if(!text.trim()){ return; }
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn = document.getElementById('copyBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ 복사됨';
+    setTimeout(()=>{ btn.textContent = orig; }, 1500);
+  }).catch(()=>{ alert('복사에 실패했습니다. 직접 선택해 복사해 주세요.'); });
+}
+
+
+
+/* =========================================================
+   5. COMPLIANCE CHECK (Module 1)
+   ========================================================= */
+function checkCompliance(text){
+  const found = [];
+  F_RULES.forEach(rule=>{
+    const re = new RegExp(rule.re.source, rule.re.flags);
+    let m;
+    while((m = re.exec(text))){
+      found.push({code:rule.code, label:rule.label, clause:rule.clause, match:m[0], sev:rule.sev});
+      if(m.index === re.lastIndex) re.lastIndex++;
+    }
+  });
+  return found;
+}
+
+/* =========================================================
+   6. STRUCTURE CHECK (Module 3) — C01~C12
+   ========================================================= */
+function checkStructure(text, track, complianceCount){
+  const result = {};
+  C_RULES.forEach(rule=>{
+    if(rule.code==='C03'){
+      const words = TRACKS[track] || [];
+      result[rule.code] = hit(text, words);
+    } else if(rule.code==='C10'){
+      result[rule.code] = complianceCount===0;
+    } else if(rule.code==='C12'){
+      result[rule.code] = state.history.length>0; // 세션 내 이전 기록 존재 시에만 판정 가능
+    } else {
+      result[rule.code] = rule.test(text);
+    }
+  });
+  return result;
+}
+
+/* =========================================================
+   7. SCORING (Module 2) — 5축
+   ========================================================= */
+function scoreAxes(text, struct){
+  const clamp = n => Math.max(1, Math.min(5, n));
+  const count = words => words.reduce((s,w)=> s + (text.split(w).length-1), 0);
+
+  const academic = clamp(1 + count(K.process) + (struct.C02?1:0));
+  const initiative = clamp(1 + count(K.lead) + (struct.C01?1:0));
+  const major = clamp(1 + (struct.C03?2:0) + (struct.C09?1:0));
+  const role = clamp(1 + count(K.lead));
+  const collab = clamp(1 + count(K.collab));
+
+  return {
+    '기초학업역량': academic,
+    '학습의 주도성': initiative,
+    '전공(진로)적합성': major,
+    '역할의 주도성': role,
+    '협업소통능력': collab
+  };
+}
+
+/* =========================================================
+   8. SUGGESTIONS (Module 4 — 나침반)
+   ========================================================= */
+const SUGGEST_TEXT = {
+  C01:'이 활동을 시작하게 된 계기가 잘 드러나지 않습니다. 관련 수업이나 이전 경험과의 연결점을 한 문장 추가해 보시겠어요?',
+  C02:'대학 수준의 개념보다, 이 활동이 어떤 교과 수업·수행평가에서 출발했는지를 먼저 밝혀보시면 어떨까요?',
+  C03:'선택하신 지원 계열과의 연결고리가 약해 보입니다. 학과명을 반복하기보다 관련 역량이 드러나는 문장을 더해보세요.',
+  C04:'학업 관련 서술은 충분하지만 협력·책임감 등 인성 요소가 보이지 않습니다. 균형을 맞춰보세요.',
+  C05:'탐구 과정이 다소 추상적입니다. 사용한 자료·수치·방법을 한 가지만 더 구체화해 보시겠어요?',
+  C06:'참여 사실은 드러나지만 본인의 구체적 역할(조장/발표/자료수집 등)이 명확하지 않습니다.',
+  C07:'협력했다는 진술은 있지만 의견 차이를 어떻게 조율했는지가 보이지 않습니다.',
+  C08:'결과가 순조롭게만 서술되어 있습니다. 겪은 어려움이나 시행착오를 덧붙이면 성장 서술이 더 설득력 있어집니다.',
+  C09:'이 활동이 다른 교과·동아리·진로활동으로 이어진 부분이 있다면 언급해 보세요.',
+  C10:'기재금지사항으로 의심되는 표현이 있습니다. 왼쪽 규정 검사 결과를 먼저 확인해 주세요.',
+  C11:'번호매기기(①②)나 특수문자, 비-명사형 종결이 섞여 있는지 확인해 주세요.',
+  C12:'세션 내 이전 학기 기록이 없어 판정할 수 없습니다. 같은 학생의 이전 학기 기록도 함께 검토해 보세요.'
+};
+
+/* =========================================================
+   9. RENDER
+   ========================================================= */
+function renderIssues(issues){
+  const wrap = document.getElementById('issueList');
+  wrap.innerHTML = '';
+  if(issues.length===0){
+    wrap.innerHTML = `<div class="empty-good">✓ 12개 기재금지 카테고리(F01~F14)에 해당하는 표현이 발견되지 않았습니다.</div>`;
+    return;
+  }
+  issues.forEach(it=>{
+    const div = document.createElement('div');
+    div.className = 'issue' + (it.sev==='suspect' ? ' suspect':'');
+    div.innerHTML = `<div class="code">${it.code} · ${it.sev==='certain'?'확실':'의심'}</div>
+      <div class="match">“${it.match}” — ${it.label}</div>
+      <div class="clause">${it.clause}</div>`;
+    wrap.appendChild(div);
+  });
+}
+
+function renderAxes(axes){
+  const wrap = document.getElementById('axisList');
+  wrap.innerHTML='';
+  Object.entries(axes).forEach(([name,score])=>{
+    const row = document.createElement('div');
+    row.className='axis-row';
+    row.innerHTML = `<div>${name}<div class="bar"><span style="width:${score/5*100}%"></span></div></div><div class="axis-score">${score}/5</div>`;
+    wrap.appendChild(row);
+  });
+  const avg = Object.values(axes).reduce((a,b)=>a+b,0)/Object.values(axes).length;
+  document.getElementById('radarScoreText').textContent = `평균 ${avg.toFixed(1)} / 5.0`;
+  const angle = -90 + (avg-1)/4*180; // -90(보완필요) ~ +90(우수)
+  document.getElementById('needle').style.transform = `rotate(${angle}deg)`;
+  return avg;
+}
+
+function renderChecklist(struct){
+  const wrap = document.getElementById('cChecklist');
+  wrap.innerHTML='';
+  C_RULES.forEach(r=>{
+    const on = struct[r.code];
+    const chip = document.createElement('div');
+    chip.className = 'chip ' + (on?'on':'off');
+    chip.title = r.desc;
+    chip.innerHTML = `<span class="dot"></span>${r.code} ${r.name}`;
+    wrap.appendChild(chip);
+  });
+}
+
+function renderSuggestions(struct){
+  const wrap = document.getElementById('suggestList');
+  wrap.innerHTML='';
+  const missing = C_RULES.filter(r=>!struct[r.code]).slice(0,4);
+  if(missing.length===0){
+    wrap.innerHTML = `<div class="empty-good" style="margin-top:10px;">✓ 12대 공통요소를 모두 충족했습니다. 훌륭한 서술 구조입니다.</div>`;
+    return;
+  }
+  missing.forEach(r=>{
+    const card = document.createElement('div');
+    card.className='suggest-card';
+    card.innerHTML = `<div class="tag2">${r.code} · ${r.name}</div><p>${SUGGEST_TEXT[r.code]}</p>`;
+    wrap.appendChild(card);
+  });
+}
+
+/* =========================================================
+   10. RUN ANALYSIS
+   ========================================================= */
+function runAnalysis(){
+  const text = document.getElementById('rawText').value.trim();
+  if(!text){ alert('원문을 입력해 주세요.'); return; }
+  const track = document.getElementById('inTrack').value || Object.keys(TRACKS)[0];
+  const meta = currentAreaMeta();
+  const g = parseGrade();
+  const subject = document.getElementById('inSubject').value;
+
+  const issues = checkCompliance(text);
+  const struct = checkStructure(text, track, issues.length);
+  const axes = scoreAxes(text, struct);
+
+  renderIssues(issues);
+  const avg = renderAxes(axes);
+  renderChecklist(struct);
+  renderSuggestions(struct);
+
+  const gradeLabels = {1:'1학년',2:'2학년',3:'3학년'};
+  const key = slotKey(meta, g, subject);
+  const isYear = isYearUnit(meta, subject, g);
+  const entry = {
+    grade: `${gradeLabels[g.grade]}${isYear?'':' '+g.semester+'학기'}`,
+    area: areaLabel(meta,g),
+    subject,
+    admType: document.getElementById('inAdmType').value,
+    track, text, chars:charCount(text),
+    issues: issues.length, avg: avg.toFixed(1), at: new Date()
+  };
+  state.history.unshift(entry);
+  // 같은 항목(슬롯)을 다시 저장하면 이전 내용을 덮어쓴다 — 학기 구분이 없는 항목/공통과목은 학년 전체가 하나의 슬롯
+  state.slots[key] = {text, chars: entry.chars, at: entry.at};
+  saveToStorage();
+  renderHistory();
+  updateMeters();
+}
+
+/* =========================================================
+   11. HISTORY
+   ========================================================= */
+function renderHistory(){
+  const card = document.getElementById('historyCard');
+  if(state.history.length===0){
+    card.innerHTML = `<div class="hist-empty">아직 분석한 기록이 없습니다. ‘분석 작업’ 탭에서 첫 검토를 시작해 보세요.</div>`;
+    return;
+  }
+  card.innerHTML = state.history.map(h=>`
+    <div class="hist-item">
+      <div>
+        <div class="name">${h.area}${h.subject? ' ('+h.subject+')':''}</div>
+        <div class="meta">${h.grade} · ${h.admType}전형 · ${h.track} · ${new Date(h.at).toLocaleTimeString('ko-KR')}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--mono); font-weight:700; color:${h.issues>0?'var(--brick)':'var(--teal)'};">${h.issues>0? h.issues+'건 위반의심':'위반 없음'}</div>
+        <div style="font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);">완성도 ${h.avg}/5.0</div>
+      </div>
+    </div>`).join('');
+}
+
+/* =========================================================
+   13. DICTIONARY VIEW
+   ========================================================= */
+let dictTab = 'rules';
+function renderDict(){
+  const q = (document.getElementById('dictSearch').value||'').trim();
+  const wrap = document.getElementById('dictTableWrap');
+  if(dictTab==='rules'){
+    const rows = F_RULES.filter(r=> !q || (r.label+r.clause+r.code).includes(q));
+    wrap.innerHTML = `<table><thead><tr><th>코드</th><th>항목</th><th>근거 조항 요약</th></tr></thead><tbody>
+      ${rows.map(r=>`<tr><td><span class="codepill">${r.code}</span></td><td>${r.label}</td><td>${r.clause}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else if(dictTab==='limits'){
+    const rows = AREAS.filter(a=> !q || a.label.includes(q));
+    const exRows = EXCLUDED_AREAS.filter(a=> !q || a.label.includes(q));
+    wrap.innerHTML = `
+      <p style="font-size:12.6px; color:var(--ink-soft); margin-top:0;">2026학년도 기재요령 · 2022 개정 교육과정을 적용받는 <b>1~2학년 기준</b>으로 재검토했습니다. ‘학년 단위’는 학기별로 나누어 입력해도 한 학년 전체가 하나의 글자수를 공유한다는 뜻입니다.</p>
+      <table><thead><tr><th>영역(이 도구가 코칭하는 항목)</th><th>최대 글자수</th><th>바이트 환산</th><th>적용 단위</th></tr></thead><tbody>
+      ${rows.map(a=>`<tr><td>${a.label}${a.label3?' <span style="color:var(--ink-faint);">(3학년: '+a.label3+')</span>':''}</td><td>${a.limit}자</td><td>${a.limit*3}Byte</td><td>${a.budget==='semester'?'과목당 학기별(공통과목 7개는 학기 합산)':'학년 전체 공유'}</td></tr>`).join('')}
+      </tbody></table>
+      <p style="font-size:12.2px; color:var(--gold); margin-top:14px; font-weight:700;">공통과목 7개 (1·2학기 합산 500자, 1~2학년만 해당)</p>
+      <p style="font-size:12.6px; color:var(--ink-soft);">${COMMON_SUBJECTS_1_2.join(' · ')}</p>
+      <p style="font-size:12.2px; color:var(--brick); margin-top:16px; font-weight:700;">이번 버전에서 제외한 항목과 사유</p>
+      <table><thead><tr><th>영역</th><th>원 규정상 최대 글자수</th><th>제외 사유</th></tr></thead><tbody>
+      ${exRows.map(a=>`<tr><td>${a.label}</td><td>${a.limit}자</td><td>${a.reason}</td></tr>`).join('')}
+      </tbody></table>`;
+  } else {
+    const rows = C_RULES.filter(r=> !q || (r.name+r.desc+r.code+(r.long||'')).includes(q));
+    wrap.innerHTML = `<p style="font-size:12.6px; color:var(--ink-soft); margin-top:0;">세 자료를 교차분석해 도출한 우수 생기부의 공통 요소입니다. 각 요소를 어떻게 채우면 좋을지 예시 문장도 함께 제공합니다. 분석 작업 화면에서 문장별로 자동 점검됩니다.</p>
+      <div class="c-card-grid">
+      ${rows.map(r=>`<div class="c-card">
+        <div class="c-card-head"><span class="codepill">${r.code}</span><b>${r.name}</b></div>
+        <p class="c-card-desc">${r.desc}</p>
+        <p class="c-card-long">${r.long||''}</p>
+        ${r.example? `<div class="c-card-example"><span class="tag2">예시</span>${r.example}</div>` : ''}
+      </div>`).join('')}
+      </div>`;
+  }
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click', ()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active'); dictTab = t.dataset.tab; renderDict();
+}));
+document.getElementById('dictSearch').addEventListener('input', renderDict);
+
+/* =========================================================
+   14. SAMPLE / CLEAR
+   ========================================================= */
+const SAMPLES = [
+  {area:'세특_과목별', subject:'화학Ⅰ', grade:'1-1', text:
+`화학 반응 속도에 흥미를 가지고 있던 중, 완충용액이 산-염기 반응에서 pH를 일정하게 유지하는 원리가 궁금해져 탐구를 시작함. 아세트산과 아세트산나트륨을 이용한 완충용액을 직접 제조하고, 소량의 산과 염기를 첨가하며 pH 변화를 측정함. 초반 실험에서는 예상과 다른 결과가 나와 시약의 몰 농도 계산에 오류가 있었음을 발견하고, 완충 방정식을 다시 세워 재실험을 진행함. 이 과정에서 이론값과 실험값의 차이를 데이터로 정리하고 원인을 분석하는 능력을 기름. 이후 인공혈액의 pH 완충 원리로 관심을 확장하여 관련 자료를 조사하고 학급에서 발표함. 실험 설계와 오차 분석 과정을 통해 화학적 현상을 정량적으로 이해하는 태도를 기르게 됨.`},
+  {area:'자율활동', subject:'', grade:'1-1', text:
+`학급 반장으로서 교실 냉방 온도를 둘러싼 학생 간 의견 차이를 공동의 문제로 인식하고 해결 방안을 주도적으로 제안함. 학생 설문조사를 통해 체감 온도 데이터를 수집하고, 이를 바탕으로 공정한 온도 산출 방식을 팀원들과 협의하여 마련함. 의견 조율 과정에서 일부 학생들의 반대에 부딪혔으나, 데이터를 근거로 다시 설명하고 대안을 제시하며 합의를 이끌어냄. 이 과정에서 갈등을 데이터로 해결하는 방법과 협업의 중요성을 깨달음.`},
+  {area:'세특_과목별', subject:'', grade:'1-1', text:
+`전국연합학력평가에서 백분위 92를 기록한 이후 자신감을 얻어 TOEIC 900점을 목표로 어학연수를 계획함. OO대회에서 수상한 경험을 바탕으로 진로를 구체화하고, 아버지가 운영하는 병원에서 인턴 체험을 하며 의료 분야에 대한 관심을 키움. 장학금을 받아 학업에 매진함.`},
+  {area:'세특_과목별', subject:'공통국어', grade:'1-1', text:
+`언어와 매체 단원에서 배운 담화의 유형을 실생활 사례에 적용해보고 싶다는 생각에, 학급 신문의 헤드라인을 수집해 설득 전략을 분석하는 탐구를 진행함. 처음에는 표제만 나열하는 데 그쳤으나, 교사의 피드백을 받아 어휘 선택과 문장 구조가 독자의 해석에 미치는 영향을 비교하는 방식으로 탐구를 보완함. 이후 사회 교과에서 배운 여론 형성 개념과 연결지어 보고서를 심화함.`},
+];
+function loadSample(){
+  const s = SAMPLES[Math.floor(Math.random()*SAMPLES.length)];
+  const [g, sem] = s.grade.split('-');
+  document.getElementById('inArea').value = s.area;
+  document.getElementById('inGrade').value = g;
+  document.getElementById('inSem').value = sem;
+  document.getElementById('inSubject').value = s.subject;
+  syncSelection(); // 선택 갱신(이 시점에 기존 저장분이 있으면 불러오지만, 바로 아래에서 예시 텍스트로 덮어씀)
+  document.getElementById('rawText').value = s.text;
+  updateMeters();
+}
+function clearWork(){
+  document.getElementById('rawText').value='';
+  document.getElementById('extraText').value='';
+  document.getElementById('mergeOut').innerHTML='';
+  document.getElementById('issueList').innerHTML='';
+  document.getElementById('axisList').innerHTML='';
+  document.getElementById('cChecklist').innerHTML='';
+  document.getElementById('suggestList').innerHTML='';
+  document.getElementById('radarScoreText').textContent='분석 전';
+  document.getElementById('needle').style.transform='rotate(-90deg)';
+  updateMeters();
+  if(typeof renderPastRecords==='function') renderPastRecords();
+}
+
+/* =========================================================
+   15. FILE IMPORT & SEGMENTATION (생기부 전체 파일 불러오기)
+   PDF·Excel·TXT에서 텍스트를 추출하고, 알려진 영역 제목을 기준으로
+   구간을 나눠 코칭 대상 영역만 골라 쓸 수 있도록 돕는다.
+   ========================================================= */
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function updateImportBadge(){
+  const badge = document.getElementById('importBadge');
+  if(!badge) return;
+  if(importedSegments.length>0){
+    const included = importedSegments.filter(s=>!s.excluded).length;
+    badge.style.display = 'inline';
+    badge.textContent = `공유됨 · ${included}개`;
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+// PDF.js는 텍스트를 낱개 조각(item)으로 반환하며 줄바꿈 정보를 주지 않는다. 조각을 그대로 이어붙이면
+// 표·단락 구조가 모두 사라져 세특 구간 인식이 크게 어긋난다. 같은 줄(Y좌표가 비슷한 조각)끼리 묶고,
+// 줄 안에서는 X좌표 순으로 정렬해 원래 화면에 보이는 줄바꿈 구조를 최대한 복원한다.
+function pdfItemsToLines(items){
+  const rows = [];
+  let curY = null, curRow = [];
+  const Y_TOL = 3;
+  items.forEach(it=>{
+    if(!it.str || !it.str.trim()){ return; } // 빈 조각(공백 전용)은 줄 판정에서 제외
+    const y = it.transform ? it.transform[5] : 0;
+    if(curY===null || Math.abs(y-curY) > Y_TOL){
+      if(curRow.length) rows.push(curRow);
+      curRow = [it];
+      curY = y;
+    } else {
+      curRow.push(it);
+    }
+  });
+  if(curRow.length) rows.push(curRow);
+  return rows.map(row=>{
+    row.sort((a,b)=> (a.transform?a.transform[4]:0) - (b.transform?b.transform[4]:0));
+    let line = '';
+    let prevEnd = null;
+    row.forEach(it=>{
+      const x = it.transform ? it.transform[4] : 0;
+      if(prevEnd!==null && x - prevEnd > (it.width||4)*0.4){ line += ' '; }
+      line += it.str;
+      prevEnd = x + (it.width || it.str.length*4);
+    });
+    return line.replace(/\s+/g,' ').trim();
+  }).filter(Boolean).join('\n');
+}
+
+async function extractTextFromFile(file){
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(ext==='txt'){
+    return await file.text();
+  }
+  if(ext==='pdf'){
+    if(typeof pdfjsLib === 'undefined') throw new Error('PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let p=1;p<=pdf.numPages;p++){
+      const page = await pdf.getPage(p);
+      const content = await page.getTextContent();
+      text += pdfItemsToLines(content.items) + '\n';
+    }
+    return text;
+  }
+  if(ext==='xlsx' || ext==='xls'){
+    if(typeof XLSX === 'undefined') throw new Error('엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, {type:'array'});
+    let text='';
+    wb.SheetNames.forEach(name=>{
+      const csv = XLSX.utils.sheet_to_csv(wb.Sheets[name], {blankrows:false});
+      text += `\n[시트:${name}]\n${csv}\n`;
+    });
+    return text;
+  }
+  throw new Error('지원하지 않는 파일 형식입니다 (pdf·xlsx·xls·txt만 가능).');
+}
+
+// 인식 대상 영역 헤더 패턴 (실제 나이스 출력물·엑셀 내보내기에서 흔한 표기를 폭넓게 매칭)
+// 실제 나이스 인쇄물은 "봉 사 활 동 실 적"처럼 글자 사이에 공백을 넣어 강조하는 경우가 많고,
+// 봉사활동 표 안에는 "(진로활동) 봉사활동 소양교육"처럼 다른 영역명이 괄호 안에 인용되기도 한다.
+// → 제목 정규식은 글자 사이 공백을 허용하고, 괄호 바로 뒤에 붙은 인용은 헤더로 인정하지 않는다(부정 전방탐색 아님, 부정 후방탐색 사용).
+const NOT_AFTER_PAREN = '(?<![（(])';
+const HEADER_DEFS = [
+  {area:'자율활동', re:()=>new RegExp(NOT_AFTER_PAREN+'자[ \\t]*율[ \\t]*[·・∙]?[ \\t]*자[ \\t]*치[ \\t]*활[ \\t]*동|'+NOT_AFTER_PAREN+'자[ \\t]*율[ \\t]*활[ \\t]*동','g')},
+  {area:'동아리활동', re:()=>new RegExp(NOT_AFTER_PAREN+'동[ \\t]*아[ \\t]*리[ \\t]*활[ \\t]*동','g')},
+  {area:'진로활동', re:()=>new RegExp(NOT_AFTER_PAREN+'진[ \\t]*로[ \\t]*활[ \\t]*동','g')},
+  {area:'행동특성', re:()=>/행[ \t]*동[ \t]*특[ \t]*성[ \t]*(?:및)?[ \t]*종[ \t]*합[ \t]*의[ \t]*견/g},
+];
+// 과목명이 헤더에 바로 붙어 반복되는 형식: "화학Ⅰ 세부능력 및 특기사항"
+// 글자 사이 공백(letter-spacing)만 허용하고 줄바꿈은 건너뛰지 않는다 — 그렇지 않으면 페이지 꼬리말의
+// 학생 이름 등 전혀 무관한 텍스트가 '세부능력 및 특기사항' 앞의 과목명으로 잘못 잡힐 수 있다.
+const SUBJECT_HEADER_RE = ()=>/([가-힣A-Za-z0-9Ⅰ-Ⅻ]{1,16}?)[ \t]*(?:과[ \t]*목)?[ \t]*세[ \t]*부[ \t]*능[ \t]*력[ \t]*및[ \t]*특[ \t]*기[ \t]*사[ \t]*항/g;
+// 세특이 섹션 전체에 한 번만 표기되고, 그 아래에 과목명이 단독 라인/콜론 형식으로만 나열되는 경우를 위한 섹션 경계
+const SETEUK_SECTION_RE = ()=>/교[ \t]*과[ \t]*학[ \t]*습[ \t]*발[ \t]*달[ \t]*상[ \t]*황|세[ \t]*부[ \t]*능[ \t]*력[ \t]*및[ \t]*특[ \t]*기[ \t]*사[ \t]*항/g;
+const EXCLUDE_DEFS = [
+  {label:'독서활동상황', re:()=>new RegExp(NOT_AFTER_PAREN+'독[ \\t]*서[ \\t]*활[ \\t]*동[ \\t]*상[ \\t]*황','g')},
+  {label:'봉사활동', re:()=>new RegExp(NOT_AFTER_PAREN+'봉[ \\t]*사[ \\t]*활[ \\t]*동','g')},
+];
+// 세특 섹션 안에서 과목명 단독 라인을 찾기 위한 과목 사전(2015·2022 개정 공통 교과목을 폭넓게 포함)
+const KNOWN_SUBJECTS = [
+  '공통국어','공통수학','공통영어','통합사회','통합과학','한국사','과학탐구실험',
+  '국어','문학','독서','화법과 작문','언어와 매체','주제 탐구 국어','문학과 영상','심화 국어','고전 읽기',
+  '수학','수학Ⅰ','수학Ⅱ','미적분','확률과 통계','기하','경제 수학','인공지능 수학','수학과제 탐구','수학과제탐구',
+  '영어','영어Ⅰ','영어Ⅱ','영어 독해와 작문','영어 회화','진로 영어','영미 문학 읽기','영어권 문화',
+  '물리학Ⅰ','물리학Ⅱ','화학Ⅰ','화학Ⅱ','생명과학Ⅰ','생명과학Ⅱ','지구과학Ⅰ','지구과학Ⅱ','융합과학','과학사',
+  '사회','사회·문화','사회문화','생활과 윤리','윤리와 사상','정치와 법','경제','세계사','동아시아사',
+  '한국지리','세계지리','여행지리','사회문제 탐구','정치','법과 정치',
+  '정보','정보과학','음악','미술','체육','운동과 건강','스포츠 생활','한문Ⅰ','한문Ⅱ','한문',
+  '일본어Ⅰ','일본어Ⅱ','중국어Ⅰ','중국어Ⅱ','독일어Ⅰ','프랑스어Ⅰ','스페인어Ⅰ','진로와 직업','논술',
+  '고급물리학','고급화학','고급생명과학','고급수학','융합선택','통계학'
+];
+function normSubj(s){ return s.trim().replace(/\s/g,''); }
+const KNOWN_SUBJECTS_NORM = new Set(KNOWN_SUBJECTS.map(normSubj));
+const COMMON_SUBJECTS_1_2_NORM = new Set(COMMON_SUBJECTS_1_2.map(normSubj));
+
+// "공통국어1·공통국어2:"(공통과목 학기합산 표기), "체육1:"(학기 숫자만 붙은 일반과목), "미술:"(단일 과목) 등을
+// 모두 인식해 과목명을 반환한다. 공통과목 7개에 한해서만 학기 숫자를 제거해 대표 과목명으로 통일한다.
+// 세특 표에서 과목명이 아니라 표 라벨(합계·평균 등)인데도 콜론이 우연히 붙어 나오는 경우를 걸러낸다
+const NON_SUBJECT_LABELS = new Set(['합계','이수학점','이수학점합계','소계','총계','비고','평균','총점','수강자수',
+  '석차등급','성취도','원점수','과목평균','학점','교과','과목','학기','성취도별분포비율','이수여부','등급'].map(normSubj));
+
+function matchSubjectHead(headRaw){
+  const cleaned = (headRaw||'').replace(/^[\-\*•▪▶◦]+/,'').trim();
+  const head = normSubj(cleaned);
+  if(!head || head.length>24) return null;
+  if(NON_SUBJECT_LABELS.has(head)) return null;
+
+  if(KNOWN_SUBJECTS_NORM.has(head)) return {label:cleaned, base:head};
+
+  const parts = head.split(/[·・‧,、]/).filter(Boolean);
+  if(parts.length>=2){
+    const bases = parts.map(p=>p.replace(/[12]$/,''));
+    if(new Set(bases).size===1 && COMMON_SUBJECTS_1_2_NORM.has(bases[0])) return {label:bases[0], base:bases[0]};
+  }
+  const stripped = head.replace(/[12]$/,'');
+  if(stripped!==head && KNOWN_SUBJECTS_NORM.has(stripped)) return {label:cleaned, base:stripped};
+
+  // 사전에 없어도, 단어 뒤에 콜론이 붙어 있으면 원칙적으로 과목명으로 인정한다(학교마다 선택과목명이
+  // 매우 다양하기 때문). 다만 완전한 문장(서술어로 끝나거나 공백이 2개 이상=세 단어 이상)은 제외한다.
+  if(cleaned.length>=1 && cleaned.length<=20
+     && /^[가-힣A-Za-z0-9Ⅰ-Ⅻ·,&/() ]+$/.test(cleaned)
+     && !/[다요임함음됨.!?][)\]]*$/.test(cleaned)
+     && (cleaned.match(/\s/g)||[]).length<=1){
+    return {label:cleaned, base:head};
+  }
+
+  return null;
+}
+
+// 세특 섹션 텍스트 안에서 과목별 하위 구간을 나눈다. (콜론이 있는 줄만 과목 헤더로 인정 — 성적표 등 다른 표의
+// 오탐을 막기 위함. 실제 나이스 세특 출력은 항상 "과목명: 내용" 형식으로 콜론을 사용함)
+function splitSubjectSections(sectionText, baseIdx){
+  const lines = sectionText.split('\n');
+  const found = [];
+  let cursor = 0;
+  for(const line of lines){
+    const trimmed = line.trim();
+    const colonIdx = trimmed.search(/[:：]/);
+    if(colonIdx > -1 && colonIdx <= 26){
+      const headRaw = trimmed.slice(0, colonIdx);
+      const m = matchSubjectHead(headRaw);
+      if(m){
+        found.push({idx: baseIdx+cursor, lineLen: line.length, subject: m.label, inline: trimmed.slice(colonIdx+1).trim()});
+      }
+    }
+    cursor += line.length + 1;
+  }
+  if(found.length===0) return null;
+  const subs = [];
+  for(let i=0;i<found.length;i++){
+    const startInSection = (found[i].idx - baseIdx) + found[i].lineLen + 1;
+    const endInSection = (i+1<found.length) ? (found[i+1].idx - baseIdx) : sectionText.length;
+    let body = (found[i].inline + '\n' + sectionText.slice(startInSection, endInSection)).trim();
+    subs.push({subject: found[i].subject, body, atIdx: found[i].idx}); // atIdx: sectionText 기준 절대 위치(= baseIdx 반영됨)
+  }
+  return subs;
+}
+
+function mergeConsecutiveDuplicates(segments){
+  // PDF 등에서 페이지가 넘어가며 같은 항목(동일 영역·과목)의 헤더가 반복돼 두 구간으로 쪼개지는 경우를 하나로 합친다.
+  const merged = [];
+  for(const seg of segments){
+    const last = merged[merged.length-1];
+    const gradeCompatible = !last || !last.gradeHint || !seg.gradeHint || last.gradeHint===seg.gradeHint;
+    if(last && !seg.excluded && !last.excluded && last.area===seg.area && (last.subject||'')===(seg.subject||'') && gradeCompatible){
+      last.text = (last.text + ' ' + seg.text).replace(/\s+/g,' ').trim();
+      last.chars = [...last.text].length;
+      last.gradeHint = last.gradeHint || seg.gradeHint;
+      last.pageMerged = (last.pageMerged||1) + 1;
+    } else if(last && seg.excluded && last.excluded && last.subject===seg.subject){
+      last.pageMerged = (last.pageMerged||1) + 1; // 제외 영역(독서/봉사)도 페이지 중복만 조용히 묶는다
+    } else {
+      merged.push({...seg});
+    }
+  }
+  return merged;
+}
+
+// 인쇄물마다 반복되는 워터마크·꼬리말 잡음을 제거한다(학교명은 고정하지 않고 일반 패턴으로 처리)
+// 예) "완산고등학교/2026.07.11 09:21/10.16.***.115/백문수"
+//     "완산고등학교 2026년 7월 11일 2 / 8 반 3 번호 7 성명 서건율"
+function stripPrintNoise(t){
+  return t
+    .replace(/[가-힣A-Za-z0-9]+고[ \t]*등[ \t]*학[ \t]*교\/[\d.]+[ \t]+[\d:]+\/[\d.*]+\/\S+/g, '')
+    .replace(/[가-힣A-Za-z0-9]+고[ \t]*등[ \t]*학[ \t]*교[ \t]*\d{4}년[ \t]*\d{1,2}월[ \t]*\d{1,2}일[ \t]*\d{1,2}[ \t]*\/[ \t]*\d{1,2}[ \t]*반[ \t]*\d{1,2}[ \t]*번호[ \t]*\d{1,2}[ \t]*성명[ \t]*[가-힣]{2,5}/g, '');
+}
+
+function parseWholeRecord(rawText){
+  const text = stripPrintNoise(rawText.replace(/\r\n/g,'\n'));
+  let matches = [];
+
+  HEADER_DEFS.forEach(def=>{
+    const re = def.re(); let m;
+    while((m = re.exec(text))){
+      matches.push({idx:m.index, end:re.lastIndex, area:def.area, subject:''});
+      if(m.index===re.lastIndex) re.lastIndex++;
+    }
+  });
+
+  const excludeMatches = [];
+  EXCLUDE_DEFS.forEach(def=>{
+    const re = def.re(); let m;
+    while((m = re.exec(text))){
+      excludeMatches.push({idx:m.index, end:re.lastIndex, area:'EXCLUDED', subject:def.label});
+      if(m.index===re.lastIndex) re.lastIndex++;
+    }
+  });
+
+  // 1차: "과목명 + 세부능력 및 특기사항"이 과목마다 반복되는 형식
+  const perSubjectHits = [];
+  {
+    const re = SUBJECT_HEADER_RE(); let m;
+    while((m = re.exec(text))){
+      let subj = (m[1]||'').trim();
+      const subjNorm = normSubj(subj);
+      if(subjNorm && !['과목','과','목'].includes(subjNorm)){
+        let area = '세특_과목별';
+        if(/개인/.test(subj)){ area='세특_개인별'; subj=''; }
+        perSubjectHits.push({idx:m.index, end:re.lastIndex, area, subject:subj});
+      }
+      if(m.index===re.lastIndex) re.lastIndex++;
+    }
+  }
+  if(perSubjectHits.length >= 2){
+    matches = matches.concat(perSubjectHits);
+  } else {
+    // 2차 대체: 세특 섹션 표기가 페이지마다 반복되고, 그 아래에 과목명이 콜론 포함 단독 라인으로 나열되는 형식.
+    // 페이지가 넘어가며 "세부능력 및 특기사항" 제목 자체가 여러 번 반복되므로, 이 반복 제목들을 각각
+    // 독립된 섹션으로 취급하지 않고 '실제 상위 경계(자율/동아리/진로/행동특성/독서/봉사)' 사이에 낀
+    // 반복 제목들을 하나로 묶어 통째로 과목을 나눈다 — 그래야 페이지 경계에서 내용이 잘리지 않는다.
+    const re = SETEUK_SECTION_RE(); let m;
+    const sectionStarts = [];
+    while((m = re.exec(text))){
+      sectionStarts.push({idx:m.index, end:re.lastIndex});
+      if(m.index===re.lastIndex) re.lastIndex++;
+    }
+    const topBoundary = matches.map(x=>x.idx).concat(excludeMatches.map(x=>x.idx)).sort((a,b)=>a-b);
+    function countBoundariesBefore(pos){ return topBoundary.filter(b=>b<=pos).length; }
+
+    const clusters = [];
+    let curCluster = null;
+    sectionStarts.forEach(sec=>{
+      const key = countBoundariesBefore(sec.idx);
+      if(!curCluster || curCluster.key!==key){ curCluster = {key, secs:[]}; clusters.push(curCluster); }
+      curCluster.secs.push(sec);
+    });
+
+    clusters.forEach(cluster=>{
+      const secs = cluster.secs;
+      const after = topBoundary.filter(b=>b>secs[secs.length-1].idx);
+      const endIdx = after.length ? Math.min(...after) : text.length;
+
+      // 반복되는 헤더 자체는 건너뛰고, 각 헤더 사이의 실제 내용만 이어붙인다. 원본 위치를 되찾기 위한 매핑도 함께 만든다.
+      let combined = '';
+      const spanMap = [];
+      for(let j=0;j<secs.length;j++){
+        const segStart = secs[j].end;
+        const segEnd = (j+1<secs.length) ? secs[j+1].idx : endIdx;
+        const chunk = text.slice(segStart, segEnd);
+        spanMap.push({combinedStart: combined.length, originalStart: segStart});
+        combined += chunk;
+      }
+      function mapToOriginal(combinedIdx){
+        for(let s=spanMap.length-1; s>=0; s--){
+          if(combinedIdx >= spanMap[s].combinedStart) return spanMap[s].originalStart + (combinedIdx - spanMap[s].combinedStart);
+        }
+        return secs[0].end;
+      }
+
+      const subs = splitSubjectSections(combined, 0);
+      if(subs && subs.length){
+        subs.forEach((s,k)=>{
+          const area = /개인/.test(s.subject) ? '세특_개인별' : '세특_과목별';
+          const origIdx = mapToOriginal(s.atIdx);
+          matches.push({idx: origIdx + 0.001*(k+1), end: origIdx + 0.001*(k+1), area, subject: area==='세특_개인별'?'':s.subject, preBody:s.body});
+        });
+      } else if(perSubjectHits.length===1){
+        matches.push(perSubjectHits[0]);
+      }
+    });
+  }
+
+  matches = matches.concat(excludeMatches);
+  matches.sort((a,b)=>a.idx-b.idx);
+
+  // 문서 전체에서 "[1학년]"·"[2학년]" 같은 학년 구간 선언을 미리 모아 둔다.
+  // 성적표처럼 긴 표가 학년 선언과 실제 세특 사이에 끼어 있어도(수천 자) 정확히 학년을 찾기 위함.
+  const gradeDeclarations = [...text.matchAll(/\[?[ \t]*([1-3])[ \t]*학[ \t]*년[ \t]*\]?/g)].map(m=>({idx:m.index, grade:m[1]}));
+  function gradeDeclaredBefore(pos){
+    let found = null;
+    for(const g of gradeDeclarations){ if(g.idx <= pos) found = g.grade; else break; }
+    return found;
+  }
+
+  const segments = [];
+  let lastGradeHint = '';
+  for(let i=0;i<matches.length;i++){
+    const cur = matches[i];
+    let body;
+    if(cur.preBody !== undefined){
+      body = cur.preBody.trim();
+    } else {
+      const nextIdx = (i+1<matches.length) ? Math.floor(matches[i+1].idx) : Math.min(text.length, cur.end+1200);
+      body = text.slice(cur.end, nextIdx).trim();
+    }
+    // 표에서 '영역 시간 특기사항'처럼 헤더 바로 뒤에 시간(숫자) 또는 학년 숫자가 붙어오는 경우가 있어 분리해 둔다
+    let leadingNum = null;
+    const leadM = body.match(/^\s*(\d{1,4})\s*\n/);
+    if(leadM){ leadingNum = leadM[1]; body = body.slice(leadM[0].length).trim(); }
+
+    // 행동특성 및 종합의견은 "학년\n1\n[1학년 내용]\n2\n[2학년 내용]"처럼 학년마다 내용이 이어 붙어
+    // 하나의 구간으로 잡히는 경우가 있다 — 학년 숫자만 있는 줄을 기준으로 다시 나눈다.
+    if(cur.area==='행동특성' && /\n[1-3][ \t]*\n/.test('\n'+body+'\n')){
+      const rawLines = body.split('\n');
+      const chunks = []; let chunk = {grade:leadingNum, lines:[]};
+      rawLines.forEach(line=>{
+        const t = line.trim();
+        if(/^[1-3]$/.test(t)){
+          if(chunk.lines.join('').trim().length) chunks.push(chunk);
+          chunk = {grade:t, lines:[]};
+        } else {
+          chunk.lines.push(line);
+        }
+      });
+      if(chunk.lines.join('').trim().length) chunks.push(chunk);
+      if(chunks.length>1){
+        chunks.forEach(c=>{
+          const ctext = c.lines.join('\n').trim();
+          if(ctext.length>=15){
+            segments.push({area:'행동특성', subject:'', gradeHint: c.grade?`${c.grade}-1`:'', text: ctext.slice(0,1600), chars:charCount(ctext), excluded:false});
+          }
+        });
+        continue;
+      }
+    }
+
+    body = body.replace(/[ \t]{2,}/g,' ').replace(/\n{3,}/g,'\n\n');
+    body = body.replace(/\n?\s*[1-3]\s*학\s*년\s*[1-2]?\s*학기?\s*$/,'').trim();
+    body = body.replace(/\n[1-3][ \t]*$/, '').trim();
+    if(body.length < 15) continue;
+    if(body.length > 1600) body = body.slice(0,1600);
+
+    const anchorIdx = Math.floor(cur.idx);
+    const back = text.slice(Math.max(0, anchorIdx-500), anchorIdx);
+    const tightBack = text.slice(Math.max(0, anchorIdx-150), anchorIdx);
+    const semM = [...back.matchAll(/([1-2])[ \t]*학[ \t]*기/g)].pop();
+
+    // 우선순위 1) 바로 근처(창의적 체험활동·행동특성 표처럼 항목마다 학년 숫자가 다시 나오는 경우)
+    // 표에 있는 다른 숫자(학기, 학점 등)를 학년으로 오인하지 않도록, 바로 직전 '한 줄'만 확인한다.
+    let gradeNum = null;
+    const tightWordM = [...tightBack.matchAll(/([1-3])[ \t]*학[ \t]*년/g)].pop();
+    if(tightWordM) gradeNum = tightWordM[1];
+    if(!gradeNum){
+      const tightLines = tightBack.split('\n').map(l=>l.trim()).filter(Boolean);
+      const lastLine = tightLines[tightLines.length-1];
+      if(lastLine && /^[1-3]$/.test(lastLine)) gradeNum = lastLine;
+    }
+    if(!gradeNum && leadingNum && /^[1-3]$/.test(leadingNum)){
+      // 헤더 '뒤'에 학년 숫자가 붙는 표 형식(예: 행동특성 및 종합의견)
+      gradeNum = leadingNum;
+    }
+    // 우선순위 2) 근처에 신호가 없으면 문서 전체에서 가장 최근에 선언된 "[N학년]" 구간을 사용
+    // (성적표처럼 긴 표가 학년 선언과 실제 세특 사이에 끼어 있는 경우)
+    if(!gradeNum) gradeNum = gradeDeclaredBefore(anchorIdx);
+
+    let gradeHint = gradeNum ? `${gradeNum}-${semM?semM[1]:1}` : '';
+    // 같은 표 안에서 학년 표기가 처음에만 나오고 이후 항목엔 생략되는 경우, 직전 항목의 학년을 이어받는다
+    // (단, 제외 영역을 지나면 흐름이 끊긴 것으로 보고 이어받지 않는다)
+    if(!gradeHint && lastGradeHint && cur.area!=='EXCLUDED'){
+      gradeHint = lastGradeHint;
+    }
+    if(cur.area==='EXCLUDED') lastGradeHint = '';
+    else if(gradeHint) lastGradeHint = gradeHint;
+
+    segments.push({area:cur.area, subject:cur.subject, gradeHint, text:body, chars:charCount(body), excluded:cur.area==='EXCLUDED'});
+  }
+  return mergeConsecutiveDuplicates(segments).slice(0,300);
+}
+
+let importedSegments = [];
+function wireImport(){
+  const dz = document.getElementById('dropzone2');
+  const fileInput = document.getElementById('fileInput2');
+  dz.addEventListener('click', ()=>fileInput.click());
+  fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev, e=>{e.preventDefault(); dz.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev, e=>{e.preventDefault(); dz.classList.remove('drag');}));
+  dz.addEventListener('drop', e=>{ if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+}
+async function handleFiles(fileListObj){
+  const files = Array.from(fileListObj);
+  if(files.length===0) return;
+  const listHtml = files.map(f=>
+    `<div class="fitem"><span>${escapeHtml(f.name)}</span><span>${(f.size/1024).toFixed(1)}KB</span></div>`).join('');
+  document.getElementById('fileList2').innerHTML = listHtml;
+  document.getElementById('parseSummary2').textContent = '파일을 분석하는 중입니다…';
+  let all = [];
+  for(const f of files){
+    try{
+      const text = await extractTextFromFile(f);
+      all = all.concat(parseWholeRecord(text));
+    }catch(e){
+      document.getElementById('parseSummary2').innerHTML += `<div style="color:var(--brick); margin-top:4px;">⚠ ${escapeHtml(f.name)}: ${escapeHtml(e.message)}</div>`;
+    }
+  }
+  importedSegments = all;
+  updateImportBadge();
+  if(currentTermOverride===null){
+    const gkeys = [...new Set(all.filter(s=>!s.excluded).map(s=>s.gradeHint).filter(Boolean))]
+      .sort((a,b)=>{ const [ag,as]=a.split('-').map(Number), [bg,bs]=b.split('-').map(Number); return (ag*10+as)-(bg*10+bs); });
+    if(gkeys.length){
+      currentTermOverride = gkeys[gkeys.length-1];
+      const [g,s] = currentTermOverride.split('-');
+      document.getElementById('curGradeSel').value = g;
+      document.getElementById('curSemSel').value = s;
+    }
+  }
+  renderSegments(all);
+  renderOverview();
+  renderCareerHopes();
+  if(typeof renderPastRecords==='function') renderPastRecords();
+  saveToStorage();
+}
+function updateCurrentTermFromUI(){
+  const g = document.getElementById('curGradeSel').value;
+  const s = document.getElementById('curSemSel').value;
+  currentTermOverride = `${g}-${s}`;
+  renderOverview();
+  saveToStorage();
+}
+function renderSegments(segments){
+  const wrap = document.getElementById('segWrap');
+  const table = document.getElementById('segTable');
+  const summary = document.getElementById('parseSummary2');
+  if(!wrap || !table || !summary) return;
+  const included = segments.filter(s=>!s.excluded);
+  const excluded = segments.filter(s=>s.excluded);
+  summary.innerHTML = `총 ${segments.length}개 구간을 인식했습니다 · 코칭 대상 ${included.length}개 · 제외 대상(독서/봉사) ${excluded.length}개`;
+  if(segments.length===0){
+    wrap.style.display='none';
+    summary.innerHTML += '<br>영역 제목을 인식하지 못했습니다. 파일 형식을 확인하거나 아래 원문 입력창에 직접 붙여넣어 주세요.';
+    return;
+  }
+  wrap.style.display='block';
+  table.innerHTML = segments.map((s,i)=>{
+    const areaLbl = s.excluded ? `제외됨 · ${s.subject}` : (AREAS.find(a=>a.key===s.area)?.label || s.area);
+    const pageNote = s.pageMerged ? ` <span style="color:var(--teal);">(페이지 ${s.pageMerged}개 병합)</span>` : '';
+    return `<div class="seg-row">
+      <div class="seg-area" style="${s.excluded?'color:var(--ink-faint); font-weight:400;':''}">${areaLbl}${pageNote}</div>
+      <div class="seg-sub">${s.subject && !s.excluded ? escapeHtml(s.subject) : ''}${s.gradeHint?(' · '+s.gradeHint.replace('-','학년 ')+'학기'):''}</div>
+      <div class="seg-preview" title="${escapeHtml(s.text.slice(0,200))}">${escapeHtml(s.text.slice(0,70))}…</div>
+      <div>${s.excluded? '' : `<button class="btn ghost sm" style="padding:4px 8px; font-size:11px;" onclick="loadSegment(${i})">불러오기</button>`}</div>
+    </div>`;
+  }).join('');
+}
+function loadSegment(i){
+  const s = importedSegments[i];
+  if(!s || s.excluded) return;
+  goTo('workspace');
+  document.getElementById('inArea').value = AREAS.find(a=>a.key===s.area) ? s.area : '세특_과목별';
+  document.getElementById('inSubject').value = s.subject || '';
+  if(s.gradeHint){
+    const [g, sem] = s.gradeHint.split('-');
+    document.getElementById('inGrade').value = g;
+    document.getElementById('inSem').value = sem || '1';
+  }
+  syncSelection();
+  document.getElementById('rawText').value = s.text; // 불러온 원본 내용으로 채움(기존 저장 초안이 있었어도 지금 불러온 내용 우선)
+  updateMeters();
+  document.getElementById('rawText').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+/* =========================================================
+   16. AI 연계 서술 병합 (추가 자료 + 기존 문구 → 통합 초안)
+   API 키가 있으면 Claude API를 직접 호출하고, 없으면 규칙 기반으로
+   대체한다. 결과는 항상 '적용' 버튼을 눌러야 원문에 반영된다(자동 반영 없음).
+   ========================================================= */
+function toggleAiSettings(){ document.getElementById('aiSettings').classList.toggle('open'); }
+
+function buildMergeSystemPrompt(hasPast, hasFocus){
+  return `너는 한국 고등학교 학교생활기록부 특기사항 작성을 돕는 보조 도구다.
+반드시 지켜야 할 규칙:
+1) '기존 문구'에 담긴 사실을 임의로 바꾸거나 지어내지 말고, '추가 자료'의 내용을 자연스럽게 이어 통합해 하나의 글로 다시 써라(단순히 뒤에 이어붙이는 것이 아니라 전체를 통합해 다시 구성하라).
+2) 추가 자료에 없는 구체적 수치·고유명사·성과를 새로 지어내지 마라. 관찰되지 않은 사실을 창작하지 마라.
+3) 문장은 명사형 어미('~함','~보임','~수행함' 등)로 종결하고 번호매기기(①②, 1))나 특수문자를 쓰지 마라.
+4) 다음은 어떤 경우에도 포함하지 마라: 공인어학시험명, 교내외 대회 수상, 모의고사·학력평가 성적, 논문 투고, 도서출간, 특허출원, 어학연수 등 해외활동, 부모의 직업 암시, 장학금, 특정 대학명·기관명·강사명, 자격증 취득 사실.
+5) 결과 전체(기존 내용 재구성분 포함)는 지정된 목표 글자수 이내여야 한다. 기존 문구가 이미 목표 글자수를 넘는 경우에도 결과는 반드시 목표 글자수를 지켜야 하며, 이때는 사실을 누락시키지 않되 문장을 간결하게 다듬고 중요도가 낮은 세부 서술 위주로 압축해 분량을 줄여라. 절대로 문장을 도중에 자르거나 미완성 상태로 끝내지 마라.
+6) 출력은 완성된 특기사항 본문만 출력하라. 설명, 인사말, 따옴표, 마크다운 기호를 붙이지 마라.
+${hasPast ? `7) '이전 학기 관련 기록'이 함께 주어진다. 지금 쓰는 내용과 실제로 자연스럽게 이어지는 지점(같은 관심사가 깊어짐, 이전 활동이 지금의 계기가 됨 등)이 있을 때만 한 문장 정도로 가볍게 연결하라. 어색하게 끼워 맞추지 말고, 연결고리가 뚜렷하지 않으면 언급하지 말고 지금 내용만으로 완성하라.` : ''}
+${hasFocus ? `8) '집중 보완 요소'가 함께 주어진다. 기존 문구와 추가 자료 안에 그 요소와 관련지을 만한 내용이 있다면, 다른 부분보다 조금 더 비중 있게(문장 하나를 더 쓰거나 더 구체적으로) 서술해 그 요소가 잘 드러나도록 하라. 단, 규칙 2를 어기면서까지(없는 사실을 지어내면서까지) 억지로 채우지는 마라 — 관련 소재가 전혀 없으면 무리하게 포함시키지 말고 자연스러운 글을 우선하라.` : ''}`;
+}
+function buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, pastRecords, focusCodes){
+  const pastBlock = (pastRecords && pastRecords.length)
+    ? `\n[이전 학기 관련 기록 — 참고용, 자연스럽게 연결될 때만 활용]\n${pastRecords.map(r=>`(${r.gradeHint?termLabel(r.gradeHint):'학년 미상'}) ${r.text}`).join('\n').slice(0,900)}\n`
+    : '';
+  const focusBlock = (focusCodes && focusCodes.length)
+    ? `\n[집중 보완 요소 — 관련 소재가 있으면 비중 있게, 없으면 억지로 채우지 말 것]\n${focusCodes.map(c=>`- ${c.code} ${c.name}: ${c.desc}`).join('\n')}\n`
+    : '';
+  const existingChars = charCount(existing);
+  const overLimitNote = existingChars > targetLimit
+    ? `\n[참고] 기존 문구가 이미 ${existingChars}자로 목표 글자수(${targetLimit}자)를 초과한 상태다. 사실은 유지하되 표현을 압축해 목표 글자수 이내로 완성하라.\n`
+    : '';
+  return `[영역] ${areaLabel(meta,g)}${subject?(' / 과목: '+subject):''}
+[목표 글자수] 결과 전체 ${targetLimit}자 이내 (기존 문구를 재구성한 부분 포함)${overLimitNote}
+${focusBlock}${pastBlock}
+[기존 문구]
+${existing || '(없음 — 추가 자료만으로 새로 작성)'}
+
+[추가 자료 — 교사가 새로 관찰한 메모]
+${extra}
+
+위 규칙을 지켜 기존 문구와 추가 자료를 하나의 자연스러운 특기사항으로 통합해 다시 써라.`;
+}
+async function callClaudeMerge(apiKey, model, existing, extra, meta, subject, g, targetLimit, pastRecords, focusCodes){
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1000,
+      system: buildMergeSystemPrompt(pastRecords && pastRecords.length>0, focusCodes && focusCodes.length>0),
+      messages:[{role:'user', content: buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, pastRecords, focusCodes)}]
+    })
+  });
+  if(!res.ok){
+    const errBody = await res.text().catch(()=> '');
+    throw new Error(`API 오류(${res.status}) ${errBody.slice(0,180)}`);
+  }
+  const data = await res.json();
+  const block = (data.content||[]).find(b=>b.type==='text');
+  if(!block) throw new Error('응답에서 텍스트를 찾지 못했습니다.');
+  return block.text.trim();
+}
+function mergeHeuristic(existing, extra){
+  const ex = (existing||'').trim();
+  const nx = (extra||'').trim();
+  if(!ex) return /[.함음됨]$/.test(nx) ? nx : nx + '함';
+  const sep = /[.함음됨]$/.test(ex) ? ' 이후 ' : '. 이후 ';
+  return (ex + sep + nx).replace(/\s+/g,' ').trim();
+}
+// 지금 이 항목에서 아직 충족되지 않은 공통요소 중, 전체 기록에서도 취약하게 나타나는 항목을 우선순위로 골라낸다.
+// (전체 진단이 없으면 이 항목에서 빠진 요소만으로 판단한다)
+function getFocusCodes(text, track){
+  const t = (text||'').trim();
+  if(!t) return [];
+  const issues = checkCompliance(t);
+  const struct = checkStructure(t, track, issues.length);
+  const missingHere = C_RULES.filter(r=> r.code!=='C10' && r.code!=='C12' && !struct[r.code]);
+  if(missingHere.length===0) return [];
+  let overview = null;
+  try{ overview = (typeof analyzeOverview==='function') ? analyzeOverview() : null; }catch(e){ overview = null; }
+  if(overview && overview.weakCodes && overview.weakCodes.length){
+    const rank = {}; overview.weakCodes.forEach((w,i)=>{ rank[w.code]=i; });
+    missingHere.sort((a,b)=> (rank[a.code]!==undefined?rank[a.code]:99) - (rank[b.code]!==undefined?rank[b.code]:99));
+  }
+  return missingHere.slice(0,3);
+}
+async function runMerge(){
+  const existing = document.getElementById('rawText').value.trim();
+  const extra = document.getElementById('extraText').value.trim();
+  if(!extra){ alert('추가 자료를 입력해 주세요.'); return; }
+
+  const meta = currentAreaMeta();
+  const g = parseGrade();
+  const subject = document.getElementById('inSubject').value;
+  const track = document.getElementById('inTrack').value || Object.keys(TRACKS)[0];
+  // AI는 기존 문구를 그대로 남겨두고 '이어붙이는' 것이 아니라 기존+추가 내용을 통째로 다시 써서 하나로
+  // 통합하므로, 목표 글자수는 항상 이 영역의 전체 한도로 준다(기존 글자수를 빼면 안 됨 — 기존 내용이 이미
+  // 한도를 넘어선 경우 목표가 지나치게 작아져 한두 문장짜리 부실한 결과가 나오는 문제가 있었음).
+  const targetLimit = meta.limit;
+  const pastRecords = getRelevantPastForMerge();
+  // 기존 문구 + 추가 자료를 합쳐서 살펴봐야, 추가 자료로 이미 채워질 요소까지 불필요하게 지목하지 않는다.
+  const focusCodes = getFocusCodes(`${existing} ${extra}`, track);
+
+  const out = document.getElementById('mergeOut');
+  out.innerHTML = `<div class="merge-result"><div class="mr-head"><span><span class="spinner"></span>초안 생성 중…</span></div></div>`;
+
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('apiModel').value.trim() || 'claude-sonnet-5';
+  let draft, mode, errMsg;
+  try{
+    if(apiKey){
+      draft = await callClaudeMerge(apiKey, model, existing, extra, meta, subject, g, targetLimit, pastRecords, focusCodes);
+      mode = 'ai';
+    } else {
+      draft = mergeHeuristic(existing, extra);
+      mode = 'heuristic';
+    }
+  }catch(e){
+    draft = mergeHeuristic(existing, extra);
+    mode = 'error';
+    errMsg = e.message;
+  }
+  renderMergeResult(draft, mode, errMsg, focusCodes);
+}
+function renderMergeResult(draft, mode, errMsg, focusCodes){
+  const track = document.getElementById('inTrack').value || Object.keys(TRACKS)[0];
+  const issues = checkCompliance(draft);
+  const struct = checkStructure(draft, track, issues.length);
+  const doneCount = C_RULES.filter(r=>struct[r.code]).length;
+  const modeLabel = mode==='ai' ? 'AI 초안 (Claude API)' : mode==='error' ? 'AI 호출 실패 → 규칙 기반으로 대체' : '규칙 기반 병합 (AI 키 없음)';
+  const pastCount = getRelevantPastForMerge().length;
+  const focusHtml = (focusCodes && focusCodes.length && mode==='ai')
+    ? `<div style="font-size:11px; color:var(--ink-soft); margin:8px 0;">🎯 집중 보완 시도: ${focusCodes.map(c=>{
+        const got = struct[c.code];
+        return `<span style="color:${got?'var(--teal)':'var(--ink-faint)'}; font-weight:700;">${c.code}${got?' ✓':''}</span>`;
+      }).join(', ')}</div>`
+    : '';
+  document.getElementById('mergeOut').innerHTML = `
+    <div class="merge-result">
+      <div class="mr-head"><span>${modeLabel}</span><span>${charCount(draft)}자</span></div>
+      <p class="mr-text">${escapeHtml(draft)}</p>
+      ${focusHtml}
+      <div class="mr-badges">
+        <span class="mr-badge ${issues.length?'warn':''}">${issues.length? '규정 위반 의심 '+issues.length+'건' : '규정 위반 없음'}</span>
+        <span class="mr-badge">공통요소 ${doneCount}/12 충족</span>
+        ${pastCount && mode==='ai' ? `<span class="mr-badge">지난 기록 ${pastCount}건 참고 가능</span>` : ''}
+      </div>
+      ${errMsg? `<div style="font-size:11.3px; color:var(--brick); margin-bottom:8px;">⚠ ${escapeHtml(errMsg)}</div>` : ''}
+      <div style="display:flex; gap:8px;">
+        <button class="btn gold sm" onclick="applyMerge()">이 초안을 원문에 적용</button>
+        <button class="btn ghost sm" onclick="document.getElementById('mergeOut').innerHTML=''">닫기</button>
+      </div>
+      <div style="font-size:10.6px; color:var(--ink-faint); margin-top:8px;">⚠ AI 초안은 참고용 제안입니다. 나이스 입력 전 사실관계와 표현을 반드시 교사가 검토해 주세요.</div>
+    </div>`;
+  state.lastDraft = draft;
+}
+function applyMerge(){
+  if(!state.lastDraft) return;
+  document.getElementById('rawText').value = state.lastDraft;
+  document.getElementById('extraText').value = '';
+  document.getElementById('mergeOut').innerHTML = '';
+  updateMeters();
+}
+
+/* =========================================================
+   17. OVERVIEW ANALYSIS (종합 진단 · 전체 방향성)
+   업로드된 전체 세그먼트를 학기·영역 단위로 종합해 흐름을 진단한다.
+   과거에 저장된 원문은 이 화면에서 절대 수정하지 않으며, '이번 학기/다음 학기에
+   무엇을 보완하면 좋을지'를 제안 문구로만 제공한다.
+   ========================================================= */
+function avg(arr){ return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 0; }
+function termLabel(k){ if(!k) return ''; const [g,s] = k.split('-'); return `${g}학년 ${s}학기`; }
+
+function analyzeOverview(){
+  const segs = importedSegments.filter(s=>!s.excluded);
+  if(segs.length===0) return null;
+
+  let gkeys = [...new Set(segs.map(s=>s.gradeHint).filter(Boolean))]
+    .sort((a,b)=>{ const [ag,as]=a.split('-').map(Number), [bg,bs]=b.split('-').map(Number); return (ag*10+as)-(bg*10+bs); });
+
+  // '현재 학년·학기'를 교사가 직접 지정했다면 그것을 이번 학기 기준으로 삼는다(자료가 아직 없는 학기라도 정확히 안내하기 위함)
+  let curTerm = currentTermOverride || gkeys[gkeys.length-1] || null;
+  if(curTerm && !gkeys.includes(curTerm)) gkeys = [...gkeys, curTerm].sort((a,b)=>{ const [ag,as]=a.split('-').map(Number), [bg,bs]=b.split('-').map(Number); return (ag*10+as)-(bg*10+bs); });
+
+  const coverage = {};
+  gkeys.forEach(k=> coverage[k] = {});
+  segs.forEach(s=>{ if(!s.gradeHint) return; coverage[s.gradeHint][s.area] = (coverage[s.gradeHint][s.area]||0) + 1; });
+
+  let nextTerm = null;
+  if(curTerm){
+    let [g,s] = curTerm.split('-').map(Number);
+    if(s===1) s=2; else { g+=1; s=1; }
+    if(g<=3) nextTerm = `${g}-${s}`;
+  }
+
+  const allText = segs.map(s=>s.text).join(' ');
+  const trackHits = {};
+  Object.keys(TRACKS).forEach(t=>{ trackHits[t] = TRACKS[t].reduce((sum,w)=> sum + (allText.split(w).length-1), 0); });
+  const specificTracks = Object.entries(trackHits).filter(([t])=>t!=='기타');
+  const topSpecific = specificTracks.sort((a,b)=>b[1]-a[1])[0];
+  const guessedTrack = (topSpecific && topSpecific[1]>0) ? topSpecific[0] : '기타';
+
+  const cCounts = {}; C_RULES.forEach(r=>cCounts[r.code]=0);
+  let totalIssues = 0;
+  const perSegAnalysis = segs.map(s=>{
+    const issues = checkCompliance(s.text);
+    totalIssues += issues.length;
+    const struct = checkStructure(s.text, guessedTrack, issues.length);
+    C_RULES.forEach(r=>{ if(struct[r.code]) cCounts[r.code]++; });
+    const axes = scoreAxes(s.text, struct);
+    return {...s, issues, struct, axes};
+  });
+  const n = segs.length;
+  const cRate = {}; C_RULES.forEach(r=> cRate[r.code] = cCounts[r.code]/n);
+  const weakCodes = C_RULES.filter(r=>r.code!=='C10' && r.code!=='C12')
+    .map(r=>({code:r.code, name:r.name, desc:r.desc, rate:cRate[r.code]}))
+    .sort((a,b)=>a.rate-b.rate);
+
+  const axisNames = Object.keys(perSegAnalysis[0]?.axes || {});
+  const curSegs = perSegAnalysis.filter(p=>p.gradeHint===curTerm);
+  const priorSegs = perSegAnalysis.filter(p=>p.gradeHint && p.gradeHint!==curTerm);
+  const axisAvgCur = curSegs.length ? avg(curSegs.flatMap(p=>axisNames.map(a=>p.axes[a]))) : null;
+  const axisAvgPrior = priorSegs.length ? avg(priorSegs.flatMap(p=>axisNames.map(a=>p.axes[a]))) : null;
+
+  const curAreas = curTerm ? Object.keys(coverage[curTerm]||{}) : [];
+  const missingCur = AREAS.filter(a=> !curAreas.includes(a.key)).map(a=>a.label);
+
+  return {gkeys, coverage, curTerm, nextTerm, guessedTrack, trackHits, weakCodes, totalIssues, axisAvgCur, axisAvgPrior, missingCur, n};
+}
+
+function buildTermTips(a){
+  const thisTips = [], nextTips = [];
+  if(!a) return {thisTips, nextTips};
+
+  if(a.missingCur.length){
+    thisTips.push(`이번 학기(${termLabel(a.curTerm)}) 기록에 아직 없는 영역이 있습니다: ${a.missingCur.join(', ')}. 학기가 끝나기 전에 관련 활동을 계획해 채워보세요.`);
+  } else if(a.curTerm){
+    thisTips.push(`이번 학기(${termLabel(a.curTerm)})는 6개 영역이 모두 기록되어 있습니다. 아래 취약 요소를 보완하는 데 집중해보세요.`);
+  }
+  a.weakCodes.slice(0,2).forEach(w=>{
+    thisTips.push(`전체 기록에서 '${w.name}'(${w.code}) 충족률이 ${(w.rate*100).toFixed(0)}%로 낮은 편입니다. ${SUGGEST_TEXT[w.code]}`);
+  });
+  if(a.axisAvgCur!==null && a.axisAvgPrior!==null && a.axisAvgCur < a.axisAvgPrior - 0.3){
+    thisTips.push(`이번 학기 서술 완성도 평균(${a.axisAvgCur.toFixed(1)})이 이전 학기 평균(${a.axisAvgPrior.toFixed(1)})보다 낮습니다. 이전 학기 기록의 구체성을 참고해 보세요.`);
+  }
+  if(thisTips.length===0) thisTips.push('업로드된 자료만으로는 이번 학기 상태를 판단하기 어렵습니다. 학년·학기 인식이 정확한지 분석 작업 탭에서 확인해 주세요.');
+
+  if(a.nextTerm){
+    nextTips.push(`다음 학기(${termLabel(a.nextTerm)})에는 '${a.guessedTrack}' 계열 키워드가 지금까지 가장 많이 나타났습니다. 이 관심을 심화할지, 다른 영역으로 넓힐지 미리 계획해 보세요.`);
+    a.weakCodes.slice(2,4).forEach(w=>{
+      nextTips.push(`다음 학기에는 '${w.name}'(${w.code}) 요소를 의식적으로 넣어보세요. ${SUGGEST_TEXT[w.code]}`);
+    });
+    nextTips.push('새 활동을 시작한다면 그 계기를 이전 학기 활동과 연결지어 기록하면 심화·확장 연쇄(C09) 요소가 강화됩니다.');
+  } else {
+    nextTips.push('3학년 2학기까지의 기록으로 보여 다음 학기 계획보다는 지금까지의 흐름을 최종 점검하는 데 집중하는 것을 권장합니다.');
+  }
+  return {thisTips, nextTips};
+}
+
+// 진로활동 기록 안에 적힌 '희망분야' 표기를 학년별로 찾아온다(나이스 창의적 체험활동 표 형식에 흔히 등장).
+function extractCareerHopes(){
+  if(typeof importedSegments==='undefined' || !importedSegments.length) return [];
+  const found = [];
+  importedSegments.filter(s=>!s.excluded && s.area==='진로활동' && s.text).forEach(s=>{
+    const m = s.text.match(/희\s*망\s*분\s*야[ \t]*[:：]?[ \t]*([^\n]{1,50})/);
+    if(m){
+      let val = m[1].trim();
+      // 페이지 병합 등으로 줄바꿈이 사라진 경우를 대비해, 다음 문장이 시작되는 지점(따옴표·마침표 등)에서 끊는다
+      const cut = val.search(/['"‘“·.]|\s[가-힣]{2,}(?:을|를|은|는|이|가|에서|하며|함)\b/);
+      if(cut > 1) val = val.slice(0, cut).trim();
+      val = val.replace(/[,\s]+$/,'');
+      if(val && val.length<=30) found.push({gradeHint:s.gradeHint, value:val});
+    }
+  });
+  const rank = k => { if(!k) return 99; const [g,s]=k.split('-').map(Number); return g*10+(s||0); };
+  found.sort((a,b)=> rank(a.gradeHint)-rank(b.gradeHint));
+  const seen = new Set(); const uniq=[];
+  found.forEach(f=>{
+    const key = f.gradeHint || '?';
+    if(!seen.has(key)){ seen.add(key); uniq.push(f); }
+  });
+  return uniq;
+}
+function renderCareerHopes(){
+  const body = document.getElementById('careerHopeBody');
+  if(!body) return;
+  const hopes = extractCareerHopes();
+  if(hopes.length===0){
+    body.innerHTML = `<div class="hope-empty">아직 불러온 파일에서 진로 희망분야를 찾지 못했습니다. 생기부 전체 파일을 불러오면 진로활동 기록에서 자동으로 찾아 표시합니다.</div>`;
+    return;
+  }
+  body.innerHTML = `<div class="hope-row">${hopes.map(h=>
+    `<div class="hope-item"><div class="hope-grade">${h.gradeHint?termLabel(h.gradeHint):'학년 미상'}</div><div class="hope-value">${escapeHtml(h.value)}</div></div>`
+  ).join('')}</div>`;
+}
+function renderOverview(){
+  const body = document.getElementById('ovBody');
+  if(!body) return;
+  const a = analyzeOverview();
+  if(!a){
+    body.innerHTML = `<div class="card pad" style="margin-top:16px;"><div class="ov-empty">아직 불러온 생기부 파일이 없습니다. 위에서 파일을 올리면 학기·영역 전체를 놓고 방향성을 진단합니다.<br>이미 ‘분석 작업’ 탭에서 파일을 불러왔다면 여기에도 자동으로 반영됩니다.</div></div>`;
+    return;
+  }
+  const {thisTips, nextTips} = buildTermTips(a);
+
+  const covHtml = `<table class="cov-table"><thead><tr><th>학기</th>${AREAS.map(ar=>`<th>${ar.label.replace('특기사항','').replace('및 종합의견','').trim()}</th>`).join('')}</tr></thead><tbody>
+    ${a.gkeys.map(k=>`<tr><td class="rowhead">${termLabel(k)}</td>${AREAS.map(ar=>{
+      const cnt = (a.coverage[k]||{})[ar.key];
+      return `<td class="${cnt?'filled':'empty'}">${cnt? (ar.key==='세특_과목별'?cnt+'개':'✓') : '—'}</td>`;
+    }).join('')}</tr>`).join('')}
+  </tbody></table>`;
+
+  const maxHit = Math.max(...Object.values(a.trackHits), 1);
+  const trackHtml = Object.entries(a.trackHits).sort((x,y)=>y[1]-x[1]).map(([t,v])=>
+    `<div class="track-bar-row"><div>${t}${t===a.guessedTrack?' ★':''}</div><div class="bar"><span style="width:${(v/maxHit*100)}%"></span></div><div>${v}</div></div>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card pad">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">학기 × 영역 기록 현황</h3>
+        ${covHtml}
+        <p style="font-size:11.5px; color:var(--ink-soft); margin-top:10px;">총 ${a.n}개 항목 분석 · 규정 위반 의심 ${a.totalIssues}건${a.totalIssues? ' — 분석 작업 탭에서 해당 항목을 불러와 확인해 주세요.':''}</p>
+      </div>
+      <div class="card pad">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">관심 계열 흐름 (키워드 기준 추정)</h3>
+        ${trackHtml}
+        <p style="font-size:11.3px; color:var(--ink-faint); margin-top:8px;">★ 전체 기록에서 가장 자주 나타난 계열(참고용 추정치). 실제 진로와 다를 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:16px;">
+      <div class="card pad">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">📌 이번 학기${a.curTerm? '('+termLabel(a.curTerm)+')':''} 보완 제안</h3>
+        ${thisTips.map(t=>`<div class="term-tip"><span class="tt-tag">THIS TERM</span><p>${escapeHtml(t)}</p></div>`).join('')}
+      </div>
+      <div class="card pad">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">🧭 ${a.nextTerm? '다음 학기('+termLabel(a.nextTerm)+')':'앞으로'} 보완 제안</h3>
+        ${nextTips.map(t=>`<div class="term-tip next"><span class="tt-tag">NEXT TERM</span><p>${escapeHtml(t)}</p></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="card pad" style="margin-top:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0;">전체 공통요소(C01~C12) 충족률 — 취약한 순</h3>
+        <button class="btn ghost sm" style="padding:5px 10px; font-size:11.3px;" onclick="goTo('dictionary')">예시 문장까지 보기 →</button>
+      </div>
+      <div class="c-weak-list">
+        ${a.weakCodes.map(w=>`<div class="c-weak-item">
+          <div class="c-weak-top"><span class="codepill">${w.code}</span><b>${w.name}</b><span class="c-weak-pct">${(w.rate*100).toFixed(0)}%</span></div>
+          <div class="bar" style="margin:4px 0 5px;"><span style="width:${w.rate*100}%"></span></div>
+          <p class="c-weak-desc">${w.desc}</p>
+        </div>`).join('')}
+      </div>
+      <p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">⚠ 이 진단은 규칙 기반 근사치이며, 과거에 저장된 원문은 이 화면에서 수정하지 않습니다. 특정 항목을 고치려면 ‘분석 작업’ 탭에서 불러와 편집해 주세요.</p>
+    </div>
+  `;
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+const restored = loadFromStorage();
+initForm();
+wireImport();
+document.getElementById('curGradeSel').addEventListener('change', updateCurrentTermFromUI);
+document.getElementById('curSemSel').addEventListener('change', updateCurrentTermFromUI);
+if(restored && currentTermOverride){
+  const [rg, rs] = currentTermOverride.split('-');
+  document.getElementById('curGradeSel').value = rg;
+  document.getElementById('curSemSel').value = rs;
+}
+renderDict();
+renderHistory();
+renderSegments(importedSegments);
+updateImportBadge();
+renderOverview();
+renderCareerHopes();
+loadQuickLinks();
+document.getElementById('linkReroschool').addEventListener('change', saveQuickLinks);
+document.getElementById('linkChatbot').addEventListener('change', saveQuickLinks);
+</script>
+</body>
+</html>
