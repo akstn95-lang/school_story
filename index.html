@@ -397,7 +397,7 @@
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v2.6<br>2026-1·2</div>
+    <div class="rail-foot">v2.7<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -408,7 +408,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v2.6</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v2.7</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -473,7 +473,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v2.6</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v2.7</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -483,12 +483,7 @@
             <span id="importBadge" style="display:none;"></span>
           </button>
           <button class="btn ghost sm" onclick="toggleLinksPanel()">🔗 바로가기</button>
-          <button class="btn ghost sm" onclick="loadSample()">예시 불러오기</button>
           <button class="btn ghost sm" onclick="clearWork()">초기화</button>
-          <button class="btn gold sm" onclick="runAnalysis()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
-            분석하기
-          </button>
         </div>
       </div>
 
@@ -582,7 +577,13 @@
           <div class="pane">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h3 style="margin-bottom:0;"><span class="num">01</span> 원문 입력</h3>
-              <button class="btn ghost sm" style="padding:5px 10px; font-size:11.3px;" onclick="copyDraft()" id="copyBtn">📋 복사</button>
+              <div style="display:flex; gap:8px;">
+                <button class="btn gold sm" style="padding:5px 12px; font-size:11.3px;" onclick="runAnalysis()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
+                  분석하기
+                </button>
+                <button class="btn ghost sm" style="padding:5px 10px; font-size:11.3px;" onclick="copyDraft()" id="copyBtn">📋 복사</button>
+              </div>
             </div>
             <textarea id="rawText" placeholder="교사가 관찰한 사실을 바탕으로 작성한 특기사항 초안을 붙여넣으세요. (명사형 종결, 특수문자 지양)" style="margin-top:8px;"></textarea>
             <div class="meter-row">
@@ -728,7 +729,7 @@
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v2.6</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v2.7</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -740,6 +741,8 @@
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v2.7 — 새 파일 업로드 시 이전 학생 정보 초기화, 분석 작업 화면 정리</dt>
+          <dd>새 생기부 파일을 불러올 때 학번·이름이 비어있을 때만 채워지던 방식이라, 이미 다른 학생의 이름이 남아있으면 새로 불러와도 갱신되지 않던 문제를 수정함 — 이제 파일을 새로 불러오면 학번·이름을 먼저 비우고, 새 파일에서 이름을 찾으면 다시 채움(진로 희망분야는 원래도 매번 다시 계산되어 정상 갱신됨). ‘예시 불러오기’ 버튼을 삭제하고, ‘분석하기’ 버튼을 상단에서 원문 입력창의 ‘복사’ 버튼 왼쪽으로 옮김.</dd>
           <dt>v2.6 — 제미나이 기본 모델명을 gemini-1.5-flash로 변경</dt>
           <dd>제미나이 기본 모델명을 gemini-2.0-flash에서 gemini-1.5-flash로 바꿈. 이전에 저장해 둔 모델명이 남아있으면 새 기본값이 바로 적용되지 않을 수 있으니, 필요하면 모델 입력창 옆의 ‘기본값’ 버튼을 눌러 되돌릴 수 있음.</dd>
           <dt>v2.5 — 저장된 모델명이 오래됐을 때 기본값으로 되돌리는 기능 추가</dt>
@@ -2138,6 +2141,11 @@ async function handleFiles(fileListObj){
     `<div class="fitem"><span>${escapeHtml(f.name)}</span><span>${(f.size/1024).toFixed(1)}KB</span></div>`).join('');
   document.getElementById('fileList2').innerHTML = listHtml;
   document.getElementById('parseSummary2').textContent = '파일을 분석하는 중입니다…';
+  // 새 파일을 불러오는 시점에 이전 학생의 학번·이름이 남아있지 않도록 먼저 비워 둔다(진로 희망분야는
+  // importedSegments가 아래에서 교체되는 즉시 다시 계산되므로 별도 초기화가 필요 없다).
+  document.getElementById('studentNo').value = '';
+  document.getElementById('studentName').value = '';
+  saveStudentInfo();
   let all = [];
   for(const f of files){
     try{
