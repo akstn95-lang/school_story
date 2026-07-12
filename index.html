@@ -397,7 +397,7 @@
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v2.8<br>2026-1·2</div>
+    <div class="rail-foot">v2.9<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -408,7 +408,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v2.8</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v2.9</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -473,7 +473,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v2.8</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v2.9</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -704,6 +704,34 @@
           <p class="sub">분석할 때마다 저장된 초안 기록입니다. ‘기록 초기화’를 누르기 전까지는 새로고침해도 남아 있습니다. 필요한 항목을 선택해 파일로 내보낼 수 있습니다.</p>
         </div>
       </div>
+      <div class="card pad" style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div style="font-weight:700; font-size:13px;">🔍 필터</div>
+          <button class="btn ghost sm" style="padding:5px 10px; font-size:11px;" onclick="resetHistoryFilters()">필터 초기화</button>
+        </div>
+        <div class="field-row" style="grid-template-columns:repeat(4,1fr); margin-bottom:0;">
+          <div class="field">
+            <label>기재 영역</label>
+            <select id="histFilterArea"><option value="">전체</option></select>
+          </div>
+          <div class="field">
+            <label>과목</label>
+            <input type="text" id="histFilterSubject" placeholder="예: 화학">
+          </div>
+          <div class="field">
+            <label>이름(학번)</label>
+            <input type="text" id="histFilterStudent" placeholder="예: 서건율 또는 30714">
+          </div>
+          <div class="field">
+            <label>전형 유형</label>
+            <select id="histFilterAdmType">
+              <option value="">전체</option>
+              <option value="종합">학생부종합전형</option>
+              <option value="교과">학생부교과전형</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="card pad" style="margin-bottom:14px; display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
         <button class="btn ghost sm" onclick="toggleAllHistory(true)">전체 선택</button>
         <button class="btn ghost sm" onclick="toggleAllHistory(false)">선택 해제</button>
@@ -729,7 +757,7 @@
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v2.8</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v2.9</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -741,6 +769,8 @@
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v2.9 — 검토 이력 필터 추가, '3축 균형' 인성 항목 명칭 보완, 과목명 잔류 오류 수정</dt>
+          <dd>검토 이력 탭에 기재 영역·과목·이름(학번)·전형 유형으로 필터링하는 기능을 추가함. C04 '3축 균형'의 인성 요소 명칭을 '인성(공동체역량)'으로 보완함. 필터 기능을 만들며, 과목이 없는 영역(자율·동아리·진로·행동특성 등)으로 바꿔도 이전에 입력했던 과목명이 화면에서만 숨겨질 뿐 실제로는 남아 있다가 저장되는 오류를 발견해 수정함 — 이제 과목이 필요 없는 영역으로 바꾸면 과목명 입력값도 함께 지워짐.</dd>
           <dt>v2.8 — 추가 자료 없이도 AI 연계 병합 진행 가능(확인 후)</dt>
           <dd>'기존 내용과 연계해 AI로 다시 쓰기'를 누를 때 추가 자료가 비어 있으면 무조건 막던 것을, 확인창을 띄워 "추가 자료 없이 기존 원문만 다듬어 진행할지" 물어보고 동의하면 진행하도록 바꿈(원문도 추가 자료도 둘 다 없으면 여전히 막음). 규칙 기반 대체 모드에서도 추가 자료가 없을 때 어색한 연결어가 붙지 않도록 정리함.</dd>
           <dt>v2.7 — 새 파일 업로드 시 이전 학생 정보 초기화, 분석 작업 화면 정리</dt>
@@ -908,8 +938,8 @@ const C_RULES = [
     long:'전공명을 직접 반복해서 언급하기보다, 그 전공에서 요구하는 사고방식이나 역량이 자연스럽게 드러나는 서술이 더 설득력 있습니다(예: 공학 지망이라면 "문제를 구조적으로 분해해 해결하는 태도").',
     example:'설계도를 반복 수정하며 오차 범위를 줄여나가는 과정에서 문제를 구조적으로 분해해 해결하는 태도를 기름.',
     test:t=>false /* track별 별도 판정 */},
-  {code:'C04', name:'3축 균형', desc:'학업역량·전공(진로)적합성·인성 요소가 함께 나타나는가',
-    long:'지식 습득이나 성취(학업역량)만 강조하면 밋밋해집니다. 협력, 배려, 책임감 같은 인성적 요소가 학업 활동 안에서 자연스럽게 함께 드러날 때 균형 잡힌 서술이 됩니다.',
+  {code:'C04', name:'3축 균형', desc:'학업역량·전공(진로)적합성·인성(공동체역량) 요소가 함께 나타나는가',
+    long:'지식 습득이나 성취(학업역량)만 강조하면 밋밋해집니다. 협력, 배려, 책임감 같은 인성(공동체역량) 요소가 학업 활동 안에서 자연스럽게 함께 드러날 때 균형 잡힌 서술이 됩니다.',
     example:'실험 데이터를 꼼꼼히 분석하는 동시에, 결과 해석에 이견이 있는 조원의 의견을 끝까지 듣고 절충안을 제시함.',
     test:t=>hit(t,K.classroom.concat(K.process))&&hit(t,K.social)},
   {code:'C05', name:'구체성(수치·방법론)', desc:'추상적 감상이 아닌 구체적 수치·자료·방법을 제시했는가',
@@ -1078,6 +1108,7 @@ function syncSelection(){
   fillAreaOptions();
   const meta = currentAreaMeta();
   document.getElementById('subjectField').style.display = meta.subject ? 'block':'none';
+  if(!meta.subject) document.getElementById('inSubject').value = ''; // 과목 없는 영역으로 바뀌면 이전 과목명이 남아있지 않도록 함
   document.getElementById('semField').style.display = (meta.budget==='year') ? 'none':'block';
   loadSlotIntoEditor();
 }
@@ -1085,6 +1116,7 @@ function syncPastSelection(){
   fillPastAreaOptions();
   const meta = currentPastAreaMeta();
   document.getElementById('pastSubjectField').style.display = meta.subject ? 'block':'none';
+  if(!meta.subject) document.getElementById('pastSubject').value = '';
   document.getElementById('pastSemField').style.display = (meta.budget==='year') ? 'none':'block';
   renderPastRecords();
 }
@@ -1390,7 +1422,7 @@ const SUGGEST_TEXT = {
   C01:'이 활동을 시작하게 된 계기가 잘 드러나지 않습니다. 관련 수업이나 이전 경험과의 연결점을 한 문장 추가해 보시겠어요?',
   C02:'대학 수준의 개념보다, 이 활동이 어떤 교과 수업·수행평가에서 출발했는지를 먼저 밝혀보시면 어떨까요?',
   C03:'선택하신 지원 계열과의 연결고리가 약해 보입니다. 학과명을 반복하기보다 관련 역량이 드러나는 문장을 더해보세요.',
-  C04:'학업 관련 서술은 충분하지만 협력·책임감 등 인성 요소가 보이지 않습니다. 균형을 맞춰보세요.',
+  C04:'학업 관련 서술은 충분하지만 협력·책임감 등 인성(공동체역량) 요소가 보이지 않습니다. 균형을 맞춰보세요.',
   C05:'탐구 과정이 다소 추상적입니다. 사용한 자료·수치·방법을 한 가지만 더 구체화해 보시겠어요?',
   C06:'참여 사실은 드러나지만 본인의 구체적 역할(조장/발표/자료수집 등)이 명확하지 않습니다.',
   C07:'협력했다는 진술은 있지만 의견 차이를 어떻게 조율했는지가 보이지 않습니다.',
@@ -1513,14 +1545,54 @@ function runAnalysis(){
    11. HISTORY
    ========================================================= */
 let editingHistoryIndex = null;
+function populateHistoryFilters(){
+  const areaSel = document.getElementById('histFilterArea');
+  if(!areaSel) return;
+  const areas = [...new Set(state.history.map(h=>h.area))].sort();
+  const curVal = areaSel.value;
+  areaSel.innerHTML = '<option value="">전체</option>' + areas.map(a=>`<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+  if(areas.includes(curVal)) areaSel.value = curVal;
+}
+function getFilteredHistoryIndices(){
+  const areaF = (document.getElementById('histFilterArea')||{}).value || '';
+  const subjF = ((document.getElementById('histFilterSubject')||{}).value || '').trim().toLowerCase();
+  const studF = ((document.getElementById('histFilterStudent')||{}).value || '').trim().toLowerCase();
+  const admF = (document.getElementById('histFilterAdmType')||{}).value || '';
+  return state.history.map((h,i)=>i).filter(i=>{
+    const h = state.history[i];
+    if(areaF && h.area !== areaF) return false;
+    if(subjF && !(h.subject||'').toLowerCase().includes(subjF)) return false;
+    if(studF){
+      const combo = `${h.studentName||''} ${h.studentNo||''}`.toLowerCase();
+      if(!combo.includes(studF)) return false;
+    }
+    if(admF && h.admType !== admF) return false;
+    return true;
+  });
+}
+function resetHistoryFilters(){
+  ['histFilterArea','histFilterSubject','histFilterStudent','histFilterAdmType'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  renderHistory();
+}
 function renderHistory(){
   const card = document.getElementById('historyCard');
+  populateHistoryFilters();
   if(state.history.length===0){
     card.innerHTML = `<div class="hist-empty">아직 분석한 기록이 없습니다. ‘분석 작업’ 탭에서 첫 검토를 시작해 보세요.</div>`;
     updateHistorySelCount();
     return;
   }
-  card.innerHTML = state.history.map((h,i)=>{
+  const indices = getFilteredHistoryIndices();
+  if(indices.length===0){
+    card.innerHTML = `<div class="hist-empty">필터 조건에 맞는 기록이 없습니다.</div>`;
+    updateHistorySelCount();
+    return;
+  }
+  card.innerHTML = indices.map(i=>{
+    const h = state.history[i];
     const isEditing = (i===editingHistoryIndex);
     return `
     <div class="hist-item">
@@ -2739,6 +2811,10 @@ if(restored && currentTermOverride){
 }
 renderDict();
 renderHistory();
+document.getElementById('histFilterArea').addEventListener('change', renderHistory);
+document.getElementById('histFilterAdmType').addEventListener('change', renderHistory);
+document.getElementById('histFilterSubject').addEventListener('input', renderHistory);
+document.getElementById('histFilterStudent').addEventListener('input', renderHistory);
 renderSegments(importedSegments);
 updateImportBadge();
 renderOverview();
