@@ -397,7 +397,7 @@
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v2.2<br>2026-1·2</div>
+    <div class="rail-foot">v2.3<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -408,13 +408,26 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v2.2</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v2.3</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn ghost sm" onclick="goTo('workspace')">특정 항목 편집은 분석 작업에서 →</button>
           <button class="btn ghost sm" style="border-color:var(--brick-soft); color:#7C2C1C;" onclick="resetAllRecords()">🗑 기록 초기화</button>
         </div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="font-weight:700; font-size:13px;">🧑‍🎓 학생 정보</div>
+        <div class="field" style="max-width:130px; margin:0;">
+          <label style="font-size:10.5px;">학번</label>
+          <input type="text" id="studentNo" placeholder="예: 30714">
+        </div>
+        <div class="field" style="max-width:150px; margin:0;">
+          <label style="font-size:10.5px;">이름</label>
+          <input type="text" id="studentName" placeholder="예: 서건율">
+        </div>
+        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">파일을 불러오면 이름은 자동으로 채워지지만 직접 고칠 수 있습니다. 여기 입력한 학번·이름은 검토 이력에 저장되는 초안마다 함께 기록됩니다.</p>
       </div>
 
       <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
@@ -460,7 +473,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v2.2</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v2.3</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -712,7 +725,7 @@
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v2.2</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v2.3</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -724,6 +737,8 @@
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v2.3 — 검토 이력에 학번·이름·진로 희망분야 함께 저장</dt>
+          <dd>종합 진단 탭에 학생 정보(학번·이름) 입력창을 추가함. 파일을 불러오면 인쇄 꼬리말에서 이름을 자동으로 찾아 채우며, 직접 고칠 수 있음. 분석할 때마다 검토 이력에 학번·이름과 함께, 그 항목의 학년에 해당하는 진로 희망분야를 자동으로 매칭해 함께 저장함. 텍스트·Word 파일로 내보낼 때도 이 정보가 포함됨.</dd>
           <dt>v2.2 — API 키 저장(30일 자동 삭제), 검토 이력 수정·삭제, 세특 워터마크 제거 개선</dt>
           <dd>API 키를 서비스별로 이 브라우저에 저장해 다시 입력할 필요가 없게 하고, 저장한 지 30일이 지나면 자동으로 삭제되도록 함(직접 삭제하는 버튼도 추가). 검토 이력 탭에서 항목별로 ‘수정’을 누르면 원문을 바로 고쳐 저장할 수 있고(저장 시 규정검사·점수를 다시 계산하고, 분석 작업의 해당 슬롯에도 함께 반영됨), ‘삭제’로 개별 항목을 지울 수 있게 함. 세특을 불러올 때 인쇄 워터마크(학교명/날짜시간/IP/이름)가 날짜와 시간 사이에 공백이 없는 형식이면 걸러지지 않던 문제를 수정함.</dd>
           <dt>v2.1 — 새 항목 선택창 한 줄 배치, AI 서비스 선택(Claude·챗GPT·제미나이), 검토 이력 선택 저장</dt>
@@ -981,7 +996,7 @@ function resetAllRecords(){
   state.slots = {}; state.history = [];
   if(typeof importedSegments!=='undefined') importedSegments = [];
   currentTermOverride = null;
-  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem('nachimban_student'); }catch(e){}
   clearWork();
   renderHistory();
   if(typeof renderSegments==='function') renderSegments([]);
@@ -990,6 +1005,8 @@ function resetAllRecords(){
   if(typeof renderCareerHopes==='function') renderCareerHopes();
   const g = document.getElementById('curGradeSel'), s = document.getElementById('curSemSel');
   if(g) g.value='1'; if(s) s.value='1';
+  const sn = document.getElementById('studentNo'), snm = document.getElementById('studentName');
+  if(sn) sn.value=''; if(snm) snm.value='';
   alert('초기화되었습니다.');
 }
 
@@ -1255,6 +1272,31 @@ function loadQuickLinks(){
     if(data.chatbot) document.getElementById('linkChatbot').value = data.chatbot;
   }catch(e){}
 }
+function saveStudentInfo(){
+  try{
+    localStorage.setItem('nachimban_student', JSON.stringify({
+      no: document.getElementById('studentNo').value,
+      name: document.getElementById('studentName').value
+    }));
+  }catch(e){}
+}
+function loadStudentInfo(){
+  try{
+    const raw = localStorage.getItem('nachimban_student');
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    if(data.no) document.getElementById('studentNo').value = data.no;
+    if(data.name) document.getElementById('studentName').value = data.name;
+  }catch(e){}
+}
+// 저장 시점의 학년에 해당하는 진로 희망분야를 찾는다(정확히 일치하는 학년이 없으면 가장 최근 값을 사용)
+function getCareerHopeForGrade(grade){
+  const hopes = extractCareerHopes();
+  if(hopes.length===0) return '';
+  const exact = hopes.find(h=> h.gradeHint && Number(h.gradeHint.split('-')[0])===grade);
+  if(exact) return exact.value;
+  return hopes[hopes.length-1].value;
+}
 
 function copyDraft(){
   const text = document.getElementById('rawText').value;
@@ -1440,6 +1482,9 @@ function runAnalysis(){
     subject,
     admType: document.getElementById('inAdmType').value,
     track, text, chars:charCount(text),
+    studentNo: document.getElementById('studentNo').value.trim(),
+    studentName: document.getElementById('studentName').value.trim(),
+    careerHope: getCareerHopeForGrade(g.grade),
     issues: issues.length, avg: avg.toFixed(1), at: new Date()
   };
   state.history.unshift(entry);
@@ -1469,8 +1514,8 @@ function renderHistory(){
         <div class="hist-main">
           <input type="checkbox" class="hist-checkbox" data-idx="${i}" onchange="updateHistorySelCount()" ${isEditing?'disabled':''}>
           <div>
-            <div class="name">${h.area}${h.subject? ' ('+h.subject+')':''}</div>
-            <div class="meta">${h.grade} · ${h.admType}전형 · ${h.track} · ${new Date(h.at).toLocaleTimeString('ko-KR')}</div>
+            <div class="name">${h.area}${h.subject? ' ('+h.subject+')':''}${h.studentName? ' · '+escapeHtml(h.studentName)+(h.studentNo?'('+escapeHtml(h.studentNo)+')':''):''}</div>
+            <div class="meta">${h.grade} · ${h.admType}전형 · ${h.track}${h.careerHope?' · 희망분야: '+escapeHtml(h.careerHope):''} · ${new Date(h.at).toLocaleTimeString('ko-KR')}</div>
           </div>
         </div>
         <div style="text-align:right; flex-shrink:0;">
@@ -1550,7 +1595,7 @@ function exportHistoryAsText(){
   const items = getSelectedHistoryItems();
   if(items.length===0){ alert('내보낼 항목을 먼저 선택해 주세요.'); return; }
   const content = items.map(h=>
-    `[${h.grade} · ${h.area}${h.subject?' ('+h.subject+')':''}]\n${h.text}\n(글자수 ${h.chars}자 · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')})`
+    `[${h.grade} · ${h.area}${h.subject?' ('+h.subject+')':''}]\n학생: ${h.studentName||'(미입력)'}${h.studentNo?' ('+h.studentNo+')':''} · 진로 희망분야: ${h.careerHope||'(미입력)'}\n${h.text}\n(글자수 ${h.chars}자 · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')})`
   ).join('\n\n' + '-'.repeat(30) + '\n\n');
   const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
   triggerDownload(blob, `생기부_초안_${new Date().toISOString().slice(0,10)}.txt`);
@@ -1560,6 +1605,7 @@ function exportHistoryAsDoc(){
   if(items.length===0){ alert('내보낼 항목을 먼저 선택해 주세요.'); return; }
   const bodyHtml = items.map(h=>
     `<h3>${escapeHtml(h.grade)} · ${escapeHtml(h.area)}${h.subject?' ('+escapeHtml(h.subject)+')':''}</h3>
+     <p style="color:#555; font-size:9.5pt;">학생: ${escapeHtml(h.studentName||'(미입력)')}${h.studentNo?' ('+escapeHtml(h.studentNo)+')':''} · 진로 희망분야: ${escapeHtml(h.careerHope||'(미입력)')}</p>
      <p>${escapeHtml(h.text).replace(/\n/g,'<br>')}</p>
      <p style="color:#888; font-size:9pt;">글자수 ${h.chars}자 · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')}</p>`
   ).join('<hr>');
@@ -2088,6 +2134,13 @@ async function handleFiles(fileListObj){
     try{
       const text = await extractTextFromFile(f);
       all = all.concat(parseWholeRecord(text));
+      if(!document.getElementById('studentName').value.trim()){
+        const nameMatch = text.match(/성\s*명[ \t]*[:：]?[ \t]*([가-힣]{2,5})(?!\S)/);
+        if(nameMatch){
+          document.getElementById('studentName').value = nameMatch[1];
+          saveStudentInfo();
+        }
+      }
     }catch(e){
       document.getElementById('parseSummary2').innerHTML += `<div style="color:var(--brick); margin-top:4px;">⚠ ${escapeHtml(f.name)}: ${escapeHtml(e.message)}</div>`;
     }
@@ -2663,6 +2716,9 @@ renderCareerHopes();
 loadQuickLinks();
 document.getElementById('linkReroschool').addEventListener('change', saveQuickLinks);
 document.getElementById('linkChatbot').addEventListener('change', saveQuickLinks);
+loadStudentInfo();
+document.getElementById('studentNo').addEventListener('change', saveStudentInfo);
+document.getElementById('studentName').addEventListener('change', saveStudentInfo);
 </script>
 </body>
 </html>
