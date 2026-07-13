@@ -7,8 +7,56 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// 일부 학교·기관 네트워크는 특정 CDN 도메인만 선택적으로 차단한다. 그런 환경에서도 파일 불러오기가
+// 되도록, 라이브러리를 한 곳에서만 불러오지 않고 여러 CDN을 순서대로 시도한다. 첫 번째가 막혀 있어도
+// 두 번째·세 번째가 열려 있으면 정상 동작한다.
+function loadScriptFrom(urls, checkFn){
+  return new Promise((resolve, reject)=>{
+    let i = 0;
+    function tryNext(){
+      if(checkFn && checkFn()){ resolve(i-1); return; }
+      if(i >= urls.length){ reject(new Error('모든 경로에서 불러오기에 실패했습니다.')); return; }
+      const idx = i++;
+      const tag = document.createElement('script');
+      tag.src = urls[idx];
+      tag.onload = ()=>{ if(!checkFn || checkFn()) resolve(idx); else tryNext(); };
+      tag.onerror = tryNext;
+      document.head.appendChild(tag);
+    }
+    tryNext();
+  });
+}
+const PDFJS_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js',
+  'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js'
+];
+const PDFJS_WORKER_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',
+  'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js',
+  'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js'
+];
+const XLSX_URLS = [
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+  'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+];
+let _pdfjsLoadPromise = null, _xlsxLoadPromise = null;
+function ensurePdfJsLoaded(){
+  if(!_pdfjsLoadPromise){
+    _pdfjsLoadPromise = loadScriptFrom(PDFJS_URLS, ()=>typeof pdfjsLib!=='undefined')
+      .then(idx=>{ pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URLS[idx] || PDFJS_WORKER_URLS[0]; });
+  }
+  return _pdfjsLoadPromise;
+}
+function ensureXlsxLoaded(){
+  if(!_xlsxLoadPromise){
+    _xlsxLoadPromise = loadScriptFrom(XLSX_URLS, ()=>typeof XLSX!=='undefined');
+  }
+  return _xlsxLoadPromise;
+}
+</script>
 <style>
   :root{
     --ink:#1B2A4A;
@@ -400,7 +448,7 @@
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v3.0<br>2026-1·2</div>
+    <div class="rail-foot">v3.2<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -411,7 +459,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v3.0</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v3.2</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -491,7 +539,7 @@
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v3.0</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v3.2</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -606,7 +654,7 @@
             <textarea id="rawText" placeholder="교사가 관찰한 사실을 바탕으로 작성한 특기사항 초안을 붙여넣으세요. (명사형 종결, 특수문자 지양)" style="margin-top:8px;"></textarea>
             <div class="meter-row">
               <div class="meter">
-                <div class="label"><span>글자수(공백제외)</span><span id="charLabel">0 / 500</span></div>
+                <div class="label"><span>글자수(공백포함)</span><span id="charLabel">0 / 500</span></div>
                 <div class="bar"><div class="fill" id="charFill"></div></div>
               </div>
               <div class="meter">
@@ -775,7 +823,7 @@
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v3.0</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v3.2</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -787,6 +835,9 @@
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v3.2 — 모든 영역의 글자수 제한을 띄어쓰기 포함 기준으로 변경</dt>
+          <dd>화면에 표시되는 글자수(및 모든 영역의 500자·300자 등 한도 판정)를 띄어쓰기(공백)를 제외하던 방식에서 <b>포함</b>하는 방식으로 바꿈 — 나이스(NEIS) 실제 글자수 제한 규정 기준과 일치시킴. 바이트 표시(나이스 입력창 실제 저장 용량 기준, 한글=3Byte)는 기존과 동일하게 별도로 계속 표시함.</dd>
+          <dt>v3.1 — PDF·엑셀 라이브러리를 여러 CDN 경로로 순차 시도(학교 네트워크에서 일부 CDN이 막혀 "0개 구간 인식" 현상 발생 시 대응), 불러오기 실패 시 실제 오류 메시지가 가려지던 문제 수정</dt>
           <dt>v3.0 — 행동특성 학기 표시 오류 수정, 진로 희망분야 직접 입력, PDF 인식 안정성 개선</dt>
           <dd>자율·동아리·진로·행동특성·개인별 세특처럼 학기 구분이 없는 영역의 기록을 확인창·AI 병합 참고자료·진로 희망분야에 표시할 때 학기가 함께 붙어 화면마다 다르게 보이던 문제를 고침 — 이제 학년만 표시함. 진로 희망분야가 자동으로 인식되지 않을 때를 위해 학년별로 직접 입력·삭제할 수 있는 기능을 추가함(직접 입력한 값이 자동 인식 값보다 우선 적용됨). PDF를 불러올 때: 일부 페이지가 손상되어도 나머지는 계속 읽도록 하고, 비밀번호로 보호된 PDF와 스캔 이미지로만 이루어진 PDF(텍스트 없음)를 구분해 명확한 안내 메시지를 보여주도록 개선함.</dd>
           <dt>v2.9 — 검토 이력 필터 추가, '3축 균형' 인성 항목 명칭 보완, 과목명 잔류 오류 수정</dt>
@@ -838,7 +889,7 @@
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">자주 묻는 질문</h3>
         <dl class="faq">
           <dt>글자수와 바이트는 왜 둘 다 보여주나요?</dt>
-          <dd>화면의 <b>글자수</b>는 한글/워드프로세서에서 흔히 쓰는 방식대로 띄어쓰기(공백)를 제외하고 셉니다. 반면 나이스(NEIS)의 실제 입력 한도는 Byte 단위이며 한글 1자를 3Byte, 공백을 1Byte로 계산해 띄어쓰기도 포함됩니다. 두 지표가 다른 기준이라 값이 다르게 보일 수 있어 함께 표시합니다 — 실제 나이스 입력 가능 여부는 <b>바이트</b> 값을 기준으로 확인해 주세요.</dd>
+          <dd>화면의 <b>글자수</b>는 나이스(NEIS) 실제 글자수 제한 규정과 같은 기준으로 띄어쓰기(공백)를 <b>포함</b>해서 셉니다. <b>바이트</b>는 나이스 입력창의 실제 저장 용량 기준(한글 1자를 3Byte, 공백을 1Byte)으로 별도 계산되며, 한글·영문이 섞여 있으면 같은 글자수라도 바이트 값이 달라질 수 있습니다. 두 지표를 함께 표시하니, 나이스 입력 가능 여부는 <b>바이트</b> 값도 함께 확인해 주세요.</dd>
           <dt>왜 자동으로 문장을 고쳐주지 않나요?</dt>
           <dd>기재요령은 “생성형 AI가 만든 자료를 그대로 서술형 항목에 입력하는 행위”를 신뢰도 저해 사례로 명시하고 있습니다. 이 앱은 실제 관찰되지 않은 사실을 창작하지 않도록, 진단과 질문형 제안까지만 하고 최종 문장은 교사가 작성하도록 설계했습니다.</dd>
           <dt>세 자료 중 무엇이 가장 중요한가요?</dt>
@@ -1250,10 +1301,11 @@ function byteLen(text){
   }
   return b;
 }
-// 글자수(화면 표시용)는 띄어쓰기(공백·탭·줄바꿈)를 제외하고 센다. 바이트 수는 나이스 실제 입력 한도와
-// 맞추기 위해 공백도 포함해서 그대로 계산한다(두 지표가 다른 기준을 쓰는 이유는 도움말에 안내되어 있음).
+// 글자수(화면 표시용)는 이제 띄어쓰기(공백·탭·줄바꿈)를 포함해서 센다 — 나이스 실제 글자수 제한 규정이
+// 공백 포함 기준이므로, 화면에 보이는 글자수 한도도 이 기준과 일치시킨다. 바이트 수는 그대로 별도 지표로
+// 함께 보여준다(한글=3B, 공백=1B).
 function charCount(text){
-  return [...text.replace(/\s/g,'')].length;
+  return [...text].length;
 }
 function isCommonSubject(name, gradeInfo){
   if(!gradeInfo.is12 || !name) return false;
@@ -1871,8 +1923,11 @@ async function extractTextFromFile(file){
     return await file.text();
   }
   if(ext==='pdf'){
-    if(typeof pdfjsLib === 'undefined') throw new Error('PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    try{
+      await ensurePdfJsLoaded();
+    }catch(e){
+      throw new Error('PDF 라이브러리를 불러오지 못했습니다. 학교/기관 네트워크가 외부 CDN 접속을 막고 있을 수 있습니다. 다른 네트워크(개인 핫스팟 등)에서 다시 시도해 주세요.');
+    }
     const buf = await file.arrayBuffer();
     let pdf;
     try{
@@ -1909,7 +1964,11 @@ async function extractTextFromFile(file){
     return text;
   }
   if(ext==='xlsx' || ext==='xls'){
-    if(typeof XLSX === 'undefined') throw new Error('엑셀 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.');
+    try{
+      await ensureXlsxLoaded();
+    }catch(e){
+      throw new Error('엑셀 라이브러리를 불러오지 못했습니다. 학교/기관 네트워크가 외부 CDN 접속을 막고 있을 수 있습니다. 다른 네트워크(개인 핫스팟 등)에서 다시 시도해 주세요.');
+    }
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, {type:'array'});
     let text='';
@@ -2267,6 +2326,7 @@ async function handleFiles(fileListObj){
   document.getElementById('studentName').value = '';
   saveStudentInfo();
   let all = [];
+  let fileErrors = [];
   for(const f of files){
     try{
       const text = await extractTextFromFile(f);
@@ -2279,7 +2339,7 @@ async function handleFiles(fileListObj){
         }
       }
     }catch(e){
-      document.getElementById('parseSummary2').innerHTML += `<div style="color:var(--brick); margin-top:4px;">⚠ ${escapeHtml(f.name)}: ${escapeHtml(e.message)}</div>`;
+      fileErrors.push(`<div style="color:var(--brick); margin-top:4px;">⚠ ${escapeHtml(f.name)}: ${escapeHtml(e.message)}</div>`);
     }
   }
   importedSegments = all;
@@ -2295,6 +2355,9 @@ async function handleFiles(fileListObj){
     }
   }
   renderSegments(all);
+  if(fileErrors.length){
+    document.getElementById('parseSummary2').innerHTML += fileErrors.join('');
+  }
   renderOverview();
   renderCareerHopes();
   if(typeof renderPastRecords==='function') renderPastRecords();
