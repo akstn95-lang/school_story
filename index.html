@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v3.2<br>2026-1·2</div>
+    <div class="rail-foot">v3.3<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,26 +459,13 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v3.2</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v3.3</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn ghost sm" onclick="goTo('workspace')">특정 항목 편집은 분석 작업에서 →</button>
           <button class="btn ghost sm" style="border-color:var(--brick-soft); color:#7C2C1C;" onclick="resetAllRecords()">🗑 기록 초기화</button>
         </div>
-      </div>
-
-      <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-        <div style="font-weight:700; font-size:13px;">🧑‍🎓 학생 정보</div>
-        <div class="field" style="max-width:130px; margin:0;">
-          <label style="font-size:10.5px;">학번</label>
-          <input type="text" id="studentNo" placeholder="예: 30714">
-        </div>
-        <div class="field" style="max-width:150px; margin:0;">
-          <label style="font-size:10.5px;">이름</label>
-          <input type="text" id="studentName" placeholder="예: 서건율">
-        </div>
-        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">파일을 불러오면 이름은 자동으로 채워지지만 직접 고칠 수 있습니다. 여기 입력한 학번·이름은 검토 이력에 저장되는 초안마다 함께 기록됩니다.</p>
       </div>
 
       <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
@@ -493,7 +480,35 @@ function ensureXlsxLoaded(){
             <option value="1">1학기</option><option value="2">2학기</option>
           </select>
         </div>
-        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">지금이 실제로 몇 학년 몇 학기인지 알려주시면, 자료가 아직 없는 학기라도 ‘이번 학기’ 기준으로 정확하게 안내합니다. (기본값은 업로드한 자료 중 가장 최근 학기입니다)</p>
+        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">지금이 실제로 몇 학년 몇 학기인지 먼저 알려주시면, 아래에서 파일을 불러올 때 이 학년·학기에 맞는 학번·이름을 자동으로 찾아 채웁니다. 자료가 아직 없는 학기라도 ‘이번 학기’ 기준으로 정확하게 안내합니다.</p>
+      </div>
+
+      <div class="card pad" id="ovUploadCard" style="margin-bottom:16px;">
+        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">📂 생기부 전체 파일 불러오기 <span style="font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); font-weight:400;">PDF · Excel(xlsx/xls) · TXT</span></h3>
+        <div class="dropzone" id="dropzone2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <div>파일을 여기로 끌어다 놓거나 클릭해서 선택하세요</div>
+          <div class="hint">업로드한 파일은 이 화면과 ‘분석 작업’ 탭에서 함께 사용됩니다. 파일은 브라우저 안에서만 처리되며 서버로 전송되지 않습니다. 위에서 선택한 학년·학기에 맞는 학번·이름을 파일에서 찾아 자동으로 채웁니다(찾지 못하면 비워두니 직접 입력해 주세요).</div>
+          <input type="file" id="fileInput2" accept=".pdf,.xlsx,.xls,.txt" multiple style="display:none;">
+        </div>
+        <div class="filelist" id="fileList2"></div>
+        <div id="parseSummary2" class="parse-summary"></div>
+        <div class="seg-table-wrap" id="segWrap" style="display:none;">
+          <div id="segTable"></div>
+        </div>
+      </div>
+
+      <div class="card pad" style="margin-bottom:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div style="font-weight:700; font-size:13px;">🧑‍🎓 학생 정보</div>
+        <div class="field" style="max-width:130px; margin:0;">
+          <label style="font-size:10.5px;">학번</label>
+          <input type="text" id="studentNo" placeholder="예: 30714">
+        </div>
+        <div class="field" style="max-width:150px; margin:0;">
+          <label style="font-size:10.5px;">이름</label>
+          <input type="text" id="studentName" placeholder="예: 서건율">
+        </div>
+        <p style="font-size:11.6px; color:var(--ink-soft); margin:0; flex:1; min-width:220px;">파일을 불러오면 위에서 선택한 학년·학기에 맞는 학번·이름이 자동으로 채워지지만, 찾지 못하면 비워두니 직접 입력·수정할 수 있습니다. 여기 입력한 학번·이름은 검토 이력에 저장되는 초안마다 함께 기록됩니다.</p>
       </div>
 
       <div class="card pad" style="margin-bottom:16px;" id="careerHopeCard">
@@ -516,21 +531,6 @@ function ensureXlsxLoaded(){
         </div>
       </div>
 
-      <div class="card pad" id="ovUploadCard">
-        <h3 style="font-family:var(--serif); font-size:15.5px; margin:0 0 10px;">📂 생기부 전체 파일 불러오기 <span style="font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); font-weight:400;">PDF · Excel(xlsx/xls) · TXT</span></h3>
-        <div class="dropzone" id="dropzone2">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <div>파일을 여기로 끌어다 놓거나 클릭해서 선택하세요</div>
-          <div class="hint">업로드한 파일은 이 화면과 ‘분석 작업’ 탭에서 함께 사용됩니다. 파일은 브라우저 안에서만 처리되며 서버로 전송되지 않습니다.</div>
-          <input type="file" id="fileInput2" accept=".pdf,.xlsx,.xls,.txt" multiple style="display:none;">
-        </div>
-        <div class="filelist" id="fileList2"></div>
-        <div id="parseSummary2" class="parse-summary"></div>
-        <div class="seg-table-wrap" id="segWrap" style="display:none;">
-          <div id="segTable"></div>
-        </div>
-      </div>
-
       <div id="ovBody"></div>
     </section>
 
@@ -539,7 +539,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v3.2</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v3.3</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -823,7 +823,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v3.2</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v3.3</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -835,6 +835,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v3.3 — 학년·학기를 먼저 지정한 뒤 불러오도록 화면 순서 변경, 학번·이름 자동 인식 추가</dt>
+          <dd>‘현재 학년·학기’ 카드를 화면 맨 위로 옮기고 그 바로 다음에 ‘생기부 전체 파일 불러오기’ 카드를 배치함(학생 정보·진로 희망분야는 그 아래로). 파일을 불러올 때 인쇄 꼬리말(반·번호·성명)이나 ‘학번’ 라벨을 인식해, 위에서 지정한 학년에 해당하는 학번·이름을 자동으로 찾아 채우도록 함 — 이전에는 이름만 자동 인식했고 학번은 항상 직접 입력해야 했음. 자동으로 찾지 못하면 값을 비워 두어 기존처럼 직접 입력할 수 있도록 함. ‘현재 학년·학기’를 나중에 다시 바꾸면 그 학년에 맞는 학번·이름을 다시 찾아 채움.</dd>
           <dt>v3.2 — 모든 영역의 글자수 제한을 띄어쓰기 포함 기준으로 변경</dt>
           <dd>화면에 표시되는 글자수(및 모든 영역의 500자·300자 등 한도 판정)를 띄어쓰기(공백)를 제외하던 방식에서 <b>포함</b>하는 방식으로 바꿈 — 나이스(NEIS) 실제 글자수 제한 규정 기준과 일치시킴. 바이트 표시(나이스 입력창 실제 저장 용량 기준, 한글=3Byte)는 기존과 동일하게 별도로 계속 표시함.</dd>
           <dt>v3.1 — PDF·엑셀 라이브러리를 여러 CDN 경로로 순차 시도(학교 네트워크에서 일부 CDN이 막혀 "0개 구간 인식" 현상 발생 시 대응), 불러오기 실패 시 실제 오류 메시지가 가려지던 문제 수정</dt>
@@ -1110,6 +1112,7 @@ function resetAllRecords(){
   if(!confirm('저장된 모든 초안·검토 이력·불러온 파일 데이터를 지웁니다. 이 작업은 되돌릴 수 없습니다. 계속할까요?')) return;
   state.slots = {}; state.history = [];
   if(typeof importedSegments!=='undefined') importedSegments = [];
+  if(typeof studentInfoCandidates!=='undefined') studentInfoCandidates = [];
   currentTermOverride = null;
   manualCareerHopes = {};
   try{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem('nachimban_student'); localStorage.removeItem('nachimban_manual_hopes'); }catch(e){}
@@ -2303,6 +2306,66 @@ function parseWholeRecord(rawText){
   return mergeConsecutiveDuplicates(segments).slice(0,300);
 }
 
+// 인쇄물 꼬리말(반·번호·성명)이나 "학번" 라벨, "성명" 라벨에서 학번·이름 후보를 학년별로 추출한다.
+// 꼬리말 자체에는 학년이 없는 경우가 많아, 같은 위치 이전에 가장 최근에 선언된 "[N학년]" 표시와 짝지어
+// 학번(학년 1자리 + 반 2자리 + 번호 2자리)을 구성한다. 여러 후보가 나올 수 있으므로 배열로 반환한다.
+function extractStudentInfoCandidates(rawText){
+  const text = rawText.replace(/\r\n/g,'\n');
+  const gradeDecls = [...text.matchAll(/\[?[ \t]*([1-3])[ \t]*학[ \t]*년[ \t]*\]?/g)].map(m=>({idx:m.index, grade:m[1]}));
+  function gradeNear(pos){
+    let found = null;
+    for(const g of gradeDecls){ if(g.idx <= pos) found = g.grade; else break; }
+    return found;
+  }
+  const pad2 = n => String(n).padStart(2,'0');
+  const out = [];
+  const re1 = /[가-힣A-Za-z0-9]+고[ \t]*등[ \t]*학[ \t]*교[ \t]*\d{4}년[ \t]*\d{1,2}월[ \t]*\d{1,2}일[ \t]*\d{1,2}[ \t]*\/[ \t]*\d{1,2}[ \t]*반[ \t]*(\d{1,2})[ \t]*번호[ \t]*(\d{1,2})[ \t]*성명[ \t]*([가-힣]{2,5})/g;
+  let m;
+  while((m = re1.exec(text))){
+    const grade = gradeNear(m.index);
+    out.push({ grade, studentNo: grade ? `${grade}${pad2(m[1])}${pad2(m[2])}` : '', studentName: m[3] });
+    if(m.index===re1.lastIndex) re1.lastIndex++;
+  }
+  // "학번" 라벨이 명시적으로 붙어 나오는 경우(학생 정보 표 등) — 학번 첫 자리를 학년으로 간주한다.
+  const re2 = /학[ \t]*번[ \t]*[:：]?[ \t]*(\d{4,7})/g;
+  while((m = re2.exec(text))){
+    const no = m[1];
+    out.push({ grade: no[0], studentNo: no, studentName: '' });
+    if(m.index===re2.lastIndex) re2.lastIndex++;
+  }
+  // "성명" 라벨만 단독으로 나오는 경우도 이름 후보로 남겨 둔다(기존 자동 인식과 동일한 패턴).
+  const re3 = /성\s*명[ \t]*[:：]?[ \t]*([가-힣]{2,5})(?!\S)/g;
+  while((m = re3.exec(text))){
+    out.push({ grade: gradeNear(m.index), studentNo: '', studentName: m[1] });
+    if(m.index===re3.lastIndex) re3.lastIndex++;
+  }
+  return out;
+}
+// 후보 목록에서 지정한 학년에 맞는 학번·이름을 고른다. 학번·이름이 함께 잡힌 후보를 최우선으로 쓰고,
+// 없으면 학번만·이름만이라도 학년이 맞는 후보에서, 그래도 없으면 이름은 학년 무관 후보에서 보충한다.
+function pickStudentInfoForGrade(candidates, grade){
+  const g = String(grade);
+  const sameGrade = candidates.filter(c=>c.grade===g);
+  const full = sameGrade.find(c=>c.studentNo && c.studentName);
+  if(full) return {studentNo:full.studentNo, studentName:full.studentName};
+  const no = sameGrade.find(c=>c.studentNo);
+  const name = sameGrade.find(c=>c.studentName) || candidates.find(c=>c.studentName);
+  if(no || name) return {studentNo: no?no.studentNo:'', studentName: name?name.studentName:''};
+  return null;
+}
+let studentInfoCandidates = [];
+// 위에서 선택한 '현재 학년·학기'의 학년에 맞는 학번·이름을 후보에서 찾아 채운다.
+// 찾지 못하면 값을 비워 두어(강제로 지우지 않음) 기존처럼 직접 입력할 수 있게 한다.
+function applyStudentInfoForCurrentGrade(){
+  const grade = document.getElementById('curGradeSel').value;
+  const picked = pickStudentInfoForGrade(studentInfoCandidates, grade);
+  if(picked && (picked.studentNo || picked.studentName)){
+    if(picked.studentNo) document.getElementById('studentNo').value = picked.studentNo;
+    if(picked.studentName) document.getElementById('studentName').value = picked.studentName;
+    saveStudentInfo();
+  }
+}
+
 let importedSegments = [];
 function wireImport(){
   const dz = document.getElementById('dropzone2');
@@ -2327,17 +2390,12 @@ async function handleFiles(fileListObj){
   saveStudentInfo();
   let all = [];
   let fileErrors = [];
+  let collectedCandidates = [];
   for(const f of files){
     try{
       const text = await extractTextFromFile(f);
       all = all.concat(parseWholeRecord(text));
-      if(!document.getElementById('studentName').value.trim()){
-        const nameMatch = text.match(/성\s*명[ \t]*[:：]?[ \t]*([가-힣]{2,5})(?!\S)/);
-        if(nameMatch){
-          document.getElementById('studentName').value = nameMatch[1];
-          saveStudentInfo();
-        }
-      }
+      collectedCandidates = collectedCandidates.concat(extractStudentInfoCandidates(text));
     }catch(e){
       fileErrors.push(`<div style="color:var(--brick); margin-top:4px;">⚠ ${escapeHtml(f.name)}: ${escapeHtml(e.message)}</div>`);
     }
@@ -2354,6 +2412,8 @@ async function handleFiles(fileListObj){
       document.getElementById('curSemSel').value = s;
     }
   }
+  studentInfoCandidates = collectedCandidates;
+  applyStudentInfoForCurrentGrade();
   renderSegments(all);
   if(fileErrors.length){
     document.getElementById('parseSummary2').innerHTML += fileErrors.join('');
@@ -2367,6 +2427,7 @@ function updateCurrentTermFromUI(){
   const g = document.getElementById('curGradeSel').value;
   const s = document.getElementById('curSemSel').value;
   currentTermOverride = `${g}-${s}`;
+  if(typeof applyStudentInfoForCurrentGrade==='function') applyStudentInfoForCurrentGrade();
   renderOverview();
   saveToStorage();
 }
