@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v4.3<br>2026-1·2</div>
+    <div class="rail-foot">v4.4<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v4.3</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v4.4</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v4.3</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v4.4</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -835,7 +835,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v4.3</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v4.4</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -847,6 +847,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v4.4 — 규칙 기반 병합이 글자수 한도를 무시하던 문제 수정, 공식 기재요령 원문으로 글자수 기준 재검증</dt>
+          <dd>실제 교육부·시도교육청 공동 발간 『2026학년도 학교생활기록부 기재요령(고등학교)』 원문(부록 08 "학교생활기록부 영역별 입력 가능 최대 글자수" 표)을 직접 대조해 이 앱의 영역별 글자수 한도(자율·동아리·진로·세특 각 500자, 행동특성 300자, 봉사활동 50자, 독서활동 공통 500자/과목별 250자)가 모두 정확히 일치함을 재확인함. 다만 AI 키가 없거나 AI 호출이 실패했을 때 쓰이는 '규칙 기반 병합'이 그동안 목표 글자수를 전혀 고려하지 않고 기존 문구와 추가 자료를 단순히 이어붙이기만 해, 기존 문구가 이미 길면 결과가 한도를 몇 배씩 초과하는 문제(예: 500자 한도에 2753자)가 실제로 있었음 — 이번에 목표 글자수를 넘으면 문장이 끝나는 지점(마침표)에서 잘라 한도 안에 들어오도록 고침. 규칙 기반 결과 화면에는 "문장을 새로 쓰지 않고 이어붙이기만 하므로 한도를 넘으면 뒷부분을 잘라낸다"는 안내를 추가해, AI 압축과 단순 절삭의 차이를 명확히 구분되게 함.</dd>
           <dt>v4.3 — AI 초안에서 수학·과학 수식은 그대로 붙여넣지 않고 말로 풀어쓰도록 규칙 추가</dt>
           <dd>원문에 C(t)=C0(1/2)^(t/h) 같은 수식이나 로그·적분 기호, 아래첨자·위첨자 표기가 섞여 있으면 AI가 그 기호를 그대로 옮겨 적던 것을, 이제는 그 수식이 뜻하는 개념·관계·풀이 과정을 한국어 문장으로 풀어서 설명하도록 프롬프트 규칙을 추가함(나이스 입력창에서 특수 기호가 깨지거나 어색하게 남는 것을 막고, 평가자가 읽기에도 수식 자체보다 의미가 더 잘 전달되도록 함). H2O·CO2처럼 짧고 널리 쓰이는 화학식 표기는 예외로 그대로 둘 수 있게 함. 출력 전 자체 점검 항목에도 '수식·기호를 말로 풀어썼는가' 확인을 추가함.</dd>
           <dt>v4.2 — "응답 토큰을 다 썼지만 완성하지 못함" 오류의 진짜 근본 원인 해결(적응형 사고 명시적 비활성화)</dt>
@@ -2765,13 +2767,36 @@ function cleanAIDraft(text){
   t = t.replace(/[ \t]{2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   return t;
 }
-function mergeHeuristic(existing, extra){
+// 규칙 기반 병합(AI 호출 없이 문장을 단순히 이어붙이는 대체 모드)은 그동안 목표 글자수를 전혀 고려하지
+// 않아, 기존 문구가 이미 길면 결과가 한도를 몇 배씩 넘는 경우(예: 500자 한도에 2753자)가 있었다.
+// 기재요령상 글자수 한도는 반드시 지켜야 하는 규정이므로, AI 없이도 최소한 한도 안에는 들어오도록
+// 목표 글자수를 넘으면 문장이 끝나는 지점(마침표) 기준으로 잘라낸다.
+function mergeHeuristic(existing, extra, targetLimit){
   const ex = (existing||'').trim();
   const nx = (extra||'').trim();
-  if(!nx) return ex; // 추가 자료 없이 진행한 경우: 규칙 기반 모드에서는 손댈 내용이 없으니 기존 원문을 그대로 반환
-  if(!ex) return /[.함음됨]$/.test(nx) ? nx : nx + '함';
-  const sep = /[.함음됨]$/.test(ex) ? ' 이후 ' : '. 이후 ';
-  return (ex + sep + nx).replace(/\s+/g,' ').trim();
+  let out;
+  if(!nx) out = ex; // 추가 자료 없이 진행한 경우: 규칙 기반 모드에서는 손댈 내용이 없으니 기존 원문을 그대로 반환
+  else if(!ex) out = /[.함음됨]$/.test(nx) ? nx : nx + '함';
+  else {
+    const sep = /[.함음됨]$/.test(ex) ? ' 이후 ' : '. 이후 ';
+    out = (ex + sep + nx).replace(/\s+/g,' ').trim();
+  }
+  if(targetLimit && charCount(out) > targetLimit){
+    out = trimToLimit(out, targetLimit);
+  }
+  return out;
+}
+// 글자수(공백 포함) 기준으로 한도를 넘는 텍스트를, 문장이 중간에 잘리지 않도록 마지막 문장 종결 지점
+// (마침표)에서 자른다. 적당한 문장 경계를 한도의 절반 이상 지점에서 찾지 못하면(문장이 너무 길거나
+// 마침표가 없는 경우) 부득이 글자수 기준으로만 자른다.
+function trimToLimit(text, limit){
+  if(charCount(text) <= limit) return text;
+  const hardCut = [...text].slice(0, limit).join('');
+  const lastPeriod = hardCut.lastIndexOf('.');
+  if(lastPeriod > -1 && lastPeriod > limit*0.5){
+    return hardCut.slice(0, lastPeriod+1);
+  }
+  return hardCut;
 }
 // 지금 이 항목에서 아직 충족되지 않은 공통요소 중, 전체 기록에서도 취약하게 나타나는 항목을 우선순위로 골라낸다.
 // (전체 진단이 없으면 이 항목에서 빠진 요소만으로 판단한다)
@@ -2825,11 +2850,11 @@ async function runMerge(){
       draft = cleanAIDraft(draft);
       mode = 'ai';
     } else {
-      draft = mergeHeuristic(existing, extra);
+      draft = mergeHeuristic(existing, extra, targetLimit);
       mode = 'heuristic';
     }
   }catch(e){
-    draft = mergeHeuristic(existing, extra);
+    draft = mergeHeuristic(existing, extra, targetLimit);
     mode = 'error';
     errMsg = e.message;
   }
@@ -2855,10 +2880,14 @@ function renderMergeResult(draft, mode, errMsg, focusCodes){
         return `<span style="color:${got?'var(--teal)':'var(--ink-faint)'}; font-weight:700;">${c.code}${got?' ✓':''}</span>`;
       }).join(', ')}</div>`
     : '';
+  const heuristicNote = (mode!=='ai')
+    ? `<div style="font-size:10.8px; color:var(--ink-faint); margin-bottom:8px;">ℹ 규칙 기반 병합은 문장을 새로 쓰지 않고 이어붙이기만 하므로, 목표 글자수를 넘으면 자연스럽게 압축하는 대신 문장이 끝나는 지점에서 뒷부분을 잘라 한도를 맞춥니다. 더 자연스러운 압축을 원하시면 AI 키를 입력해 다시 시도해 주세요.</div>`
+    : '';
   document.getElementById('mergeOut').innerHTML = `
     <div class="merge-result">
       <div class="mr-head"><span>${modeLabel}</span><span>${charCount(draft)}자</span></div>
       <p class="mr-text">${escapeHtml(draft)}</p>
+      ${heuristicNote}
       ${focusHtml}
       <div class="mr-badges">
         <span class="mr-badge ${issues.length?'warn':''}">${issues.length? '규정 위반 의심 '+issues.length+'건' : '규정 위반 없음'}</span>
