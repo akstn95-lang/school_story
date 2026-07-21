@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v4.0<br>2026-1·2</div>
+    <div class="rail-foot">v4.1<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v4.0</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v4.1</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v4.0</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v4.1</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -835,7 +835,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v4.0</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v4.1</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -847,6 +847,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v4.1 — AI 초안 후처리(따옴표·머리말 제거) 순서 버그 수정, 시뮬레이션 테스트로 검증</dt>
+          <dd>v3.8에서 추가한 cleanAIDraft가 "따옴표"와 "다음은 ~입니다:" 머리말이 같이 섞여 오는 경우(예: 전체를 감싼 따옴표 맨 앞에 머리말이 붙은 형태) 머리말 제거를 먼저 시도했다가 따옴표에 막혀 실패하고, 그 뒤 따옴표만 벗겨내면서 머리말 문구가 그대로 결과에 남는 순서 문제가 있었음 — 실제 AI 호출 없이 fetch를 모킹해 지난 실패 사례(2753자 원문)를 재현하는 시뮬레이션 스크립트로 이 문제를 발견함. 따옴표 벗기기와 머리말 제거를 같은 자리에서 안정될 때까지(최대 3회) 반복 적용하도록 고쳐, 어떤 순서로 섞여 있어도 깨끗한 본문만 남도록 함. 이 과정에서 v4.0의 토큰 예산 상향(4000)과 temperature 제거 수정이 실제로 유효한지도 함께 재검증해 정상 동작을 확인함.</dd>
           <dt>v4.0 — "응답에서 텍스트를 찾지 못했습니다" 오류 수정(추론형 AI 모델 대응)</dt>
           <dd>최신 AI 모델(claude-sonnet-5, gpt-5 계열)은 본문을 쓰기 전에 내부 추론(thinking)에 토큰을 먼저 사용하는데, 응답 토큰 예산(1600)이 추론에 모두 소진되면 본문 없이 끝나 "응답에서 텍스트를 찾지 못했습니다" 오류가 나고 규칙 기반으로 대체되는 문제가 있었음 — 세 서비스 모두 토큰 예산을 4000으로 늘려 해결함. 아울러 Claude 응답에서 추론 블록과 본문 블록이 섞여 와도 본문(text)만 정확히 모아 읽도록 파싱을 고치고, 그래도 본문이 비어 있으면 원인(내부 추론 토큰 소진)을 구체적으로 알려주는 안내 문구로 바꿈.</dd>
           <dt>v3.9 — 최신 AI 모델에서 발생하던 API 400 오류(temperature 미지원) 수정</dt>
@@ -2725,13 +2727,18 @@ async function callGemini(apiKey, model, systemPrompt, userPrompt){
   return text.trim();
 }
 // AI가 지시를 어기고 결과를 따옴표·코드펜스로 감싸거나 머리말("다음은 ~입니다:")을 붙이는 경우가 드물게
-// 있어, 본문만 남기도록 정리한다. 본문 내용 자체는 건드리지 않는다.
+// 있어, 본문만 남기도록 정리한다. 본문 내용 자체는 건드리지 않는다. 따옴표와 머리말이 섞여서(예: 따옴표
+// 안쪽에 머리말이 있거나 그 반대) 나오는 경우까지 처리하도록 안정될 때까지 최대 3번 반복 적용한다.
 function cleanAIDraft(text){
   let t = (text||'').trim();
   t = t.replace(/^```[a-z]*\n?/i,'').replace(/\n?```$/,'').trim();      // 코드펜스 제거
-  t = t.replace(/^(다음은|아래는)[^\n:]{0,30}[:.]\s*\n?/,'').trim();     // "다음은 ~입니다:" 류 머리말 제거
-  const wrapped = t.match(/^["'“‘](.*)["'”’]$/s);                        // 전체를 감싼 따옴표 제거
-  if(wrapped) t = wrapped[1].trim();
+  for(let i=0;i<3;i++){
+    const before = t;
+    const wrapped = t.match(/^["'“‘](.*)["'”’]$/s);                    // 전체를 감싼 따옴표 제거
+    if(wrapped) t = wrapped[1].trim();
+    t = t.replace(/^(다음은|아래는)[^\n:]{0,30}[:.]\s*\n?/,'').trim();   // "다음은 ~입니다:" 류 머리말 제거
+    if(t===before) break;
+  }
   t = t.replace(/[*#>]{1,}/g,'');                                        // 남은 마크다운 기호 제거
   t = t.replace(/[ \t]{2,}/g,' ').replace(/\n{3,}/g,'\n\n').trim();
   return t;
