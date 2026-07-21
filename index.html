@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v4.4<br>2026-1·2</div>
+    <div class="rail-foot">v4.5<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v4.4</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v4.5</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v4.4</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v4.5</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -835,7 +835,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v4.4</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v4.5</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -847,6 +847,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v4.5 — AI 초안도 목표 글자수를 넘기면 자동으로 잘라 한도를 강제 보장</dt>
+          <dd>v4.4는 규칙 기반(AI 미사용) 병합에만 글자수 강제 트리밍을 적용했는데, 실제로는 AI가 만든 초안도 프롬프트 지시(목표 글자수 이내)를 어기고 더 길게 쓰는 경우가 있어(예: 500자 목표에 707자) '이 초안을 원문에 적용'을 누르면 한도를 넘은 채로 원문 입력창에 그대로 들어가는 문제가 있었음 — 어떤 경로(AI든 규칙 기반이든)로 만들어졌든 결과를 화면에 보여주기 전에 마지막으로 한 번 더 글자수를 검사해, 한도를 넘으면 문장이 끝나는 지점에서 잘라 반드시 한도 안에 들어오도록 안전장치를 추가함. 실제로 잘렸을 때만 그 사실과 이유를 안내 문구로 표시함(AI 절삭인지 규칙 기반 절삭인지 구분해서 안내). 캡처 속 707자 초안으로 직접 재현 테스트해 467자로 정상 절삭되는 것을 확인함.</dd>
           <dt>v4.4 — 규칙 기반 병합이 글자수 한도를 무시하던 문제 수정, 공식 기재요령 원문으로 글자수 기준 재검증</dt>
           <dd>실제 교육부·시도교육청 공동 발간 『2026학년도 학교생활기록부 기재요령(고등학교)』 원문(부록 08 "학교생활기록부 영역별 입력 가능 최대 글자수" 표)을 직접 대조해 이 앱의 영역별 글자수 한도(자율·동아리·진로·세특 각 500자, 행동특성 300자, 봉사활동 50자, 독서활동 공통 500자/과목별 250자)가 모두 정확히 일치함을 재확인함. 다만 AI 키가 없거나 AI 호출이 실패했을 때 쓰이는 '규칙 기반 병합'이 그동안 목표 글자수를 전혀 고려하지 않고 기존 문구와 추가 자료를 단순히 이어붙이기만 해, 기존 문구가 이미 길면 결과가 한도를 몇 배씩 초과하는 문제(예: 500자 한도에 2753자)가 실제로 있었음 — 이번에 목표 글자수를 넘으면 문장이 끝나는 지점(마침표)에서 잘라 한도 안에 들어오도록 고침. 규칙 기반 결과 화면에는 "문장을 새로 쓰지 않고 이어붙이기만 하므로 한도를 넘으면 뒷부분을 잘라낸다"는 안내를 추가해, AI 압축과 단순 절삭의 차이를 명확히 구분되게 함.</dd>
           <dt>v4.3 — AI 초안에서 수학·과학 수식은 그대로 붙여넣지 않고 말로 풀어쓰도록 규칙 추가</dt>
@@ -2858,9 +2860,17 @@ async function runMerge(){
     mode = 'error';
     errMsg = e.message;
   }
-  renderMergeResult(draft, mode, errMsg, focusCodes);
+  // AI가 프롬프트 지시(목표 글자수 이내)를 어기고 더 길게 쓰는 경우가 드물게 있다 — 어떤 경로로
+  // 만들어졌든 마지막에 한 번 더 강제로 검사해, 한도를 넘으면 문장 경계에서 잘라 반드시 한도 안에
+  // 들어오도록 한다(원문 입력창에 그대로 적용해도 규정을 넘지 않도록 보장하기 위함).
+  let trimmed = false;
+  if(charCount(draft) > targetLimit){
+    draft = trimToLimit(draft, targetLimit);
+    trimmed = true;
+  }
+  renderMergeResult(draft, mode, errMsg, focusCodes, trimmed);
 }
-function renderMergeResult(draft, mode, errMsg, focusCodes){
+function renderMergeResult(draft, mode, errMsg, focusCodes, trimmed){
   const track = document.getElementById('inTrack').value || Object.keys(TRACKS)[0];
   const issues = checkCompliance(draft);
   const struct = checkStructure(draft, track, issues.length);
@@ -2880,14 +2890,16 @@ function renderMergeResult(draft, mode, errMsg, focusCodes){
         return `<span style="color:${got?'var(--teal)':'var(--ink-faint)'}; font-weight:700;">${c.code}${got?' ✓':''}</span>`;
       }).join(', ')}</div>`
     : '';
-  const heuristicNote = (mode!=='ai')
-    ? `<div style="font-size:10.8px; color:var(--ink-faint); margin-bottom:8px;">ℹ 규칙 기반 병합은 문장을 새로 쓰지 않고 이어붙이기만 하므로, 목표 글자수를 넘으면 자연스럽게 압축하는 대신 문장이 끝나는 지점에서 뒷부분을 잘라 한도를 맞춥니다. 더 자연스러운 압축을 원하시면 AI 키를 입력해 다시 시도해 주세요.</div>`
+  const trimNote = trimmed
+    ? (mode==='ai'
+        ? `<div style="font-size:10.8px; color:var(--ink-faint); margin-bottom:8px;">ℹ AI가 만든 초안이 목표 글자수(${limitNow}자)를 넘어서, 문장이 끝나는 지점에서 뒷부분을 잘라 한도를 지켰습니다. 잘린 부분이 어색하면 직접 다듬어 주세요.</div>`
+        : `<div style="font-size:10.8px; color:var(--ink-faint); margin-bottom:8px;">ℹ 규칙 기반 병합은 문장을 새로 쓰지 않고 이어붙이기만 하므로, 목표 글자수(${limitNow}자)를 넘어 문장이 끝나는 지점에서 뒷부분을 잘랐습니다. 더 자연스러운 압축을 원하시면 AI 키를 입력해 다시 시도해 주세요.</div>`)
     : '';
   document.getElementById('mergeOut').innerHTML = `
     <div class="merge-result">
       <div class="mr-head"><span>${modeLabel}</span><span>${charCount(draft)}자</span></div>
       <p class="mr-text">${escapeHtml(draft)}</p>
-      ${heuristicNote}
+      ${trimNote}
       ${focusHtml}
       <div class="mr-badges">
         <span class="mr-badge ${issues.length?'warn':''}">${issues.length? '규정 위반 의심 '+issues.length+'건' : '규정 위반 없음'}</span>
