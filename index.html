@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v5.0<br>2026-1·2</div>
+    <div class="rail-foot">v5.1<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v5.0</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v5.1</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v5.0</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v5.1</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -684,6 +684,8 @@ function ensureXlsxLoaded(){
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <h3 style="margin-bottom:0;"><span class="num">01</span> 원문 입력</h3>
               <div style="display:flex; gap:8px;">
+                <button class="btn ghost sm" style="padding:5px 10px; font-size:11.3px;" onclick="document.getElementById('rawTextFileInput').click()">📂 불러오기</button>
+                <input type="file" id="rawTextFileInput" accept=".txt,.pdf" style="display:none;">
                 <button class="btn gold sm" style="padding:5px 12px; font-size:11.3px;" onclick="runAnalysis()">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/></svg>
                   분석하기
@@ -710,10 +712,16 @@ function ensureXlsxLoaded(){
             </div>
             <textarea id="extraText" placeholder="예: 최근 동아리 발표에서 데이터 시각화 도구를 새로 활용함, 실험 중 오차 원인을 다시 찾아 재검증함 등 — 메모 형태로 입력해도 됩니다."></textarea>
 
-            <button class="btn primary sm" style="margin-top:10px; width:100%; justify-content:center;" onclick="runMerge()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
-              기존 내용과 연계해 AI로 다시 쓰기
-            </button>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button class="btn primary sm" style="flex:1; justify-content:center;" onclick="runMerge()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+                기존 내용과 연계해 AI로 다시 쓰기
+              </button>
+              <button class="btn gold sm" style="flex:1; justify-content:center;" onclick="runAugment()" title="기존 문구는 크게 건드리지 않고, 추가 자료만 다듬어 이어 붙입니다">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                보완항목 추가
+              </button>
+            </div>
             <div id="mergeOut"></div>
           </div>
 
@@ -847,6 +855,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v5.1 — '보완항목 추가' 버튼, 원문 입력창 전용 파일 불러오기 버튼 추가</dt>
+          <dd>분석 작업 화면에 '➕ 보완항목 추가' 버튼을 새로 추가함 — 기존 '기존 내용과 연계해 AI로 다시 쓰기'(전체 재구성)와 달리, 기존 문구의 표현·순서는 거의 그대로 두고 '추가 자료'만 관찰 서술 문체로 다듬어 자연스럽게 이어 붙이도록 전용 프롬프트를 새로 만듦(추가 자료가 비어 있으면 사용할 수 없음). 결과가 바이트 한도를 넘으면 기존 '다시 쓰기'와 동일하게 재압축→절삭 안전장치를 거쳐 한도를 지킴. 또한 '01 원문 입력' 창 헤더에 '📂 불러오기' 버튼을 추가해, 텍스트(.txt)나 PDF(.pdf) 파일 하나를 선택하면 그 내용을 원문 입력창에 바로 채울 수 있게 함(생기부 전체 파일 불러오기의 PDF 처리 로직을 그대로 재사용해 비밀번호 보호·스캔 이미지 PDF 등도 동일하게 안내됨). 이미 입력된 내용이 있으면 덮어쓰기 전에 먼저 확인함.</dd>
           <dt>v5.0 — 글자수 기준 완화, 바이트 기준을 실제 하드 한도로 우선 적용</dt>
           <dd>나이스(NEIS)가 실제로 강제하는 기준은 바이트라는 점에 맞춰, 이 앱의 판정 기준을 전면 개편함 — 글자수(예: 500자)는 이제 참고용 기준일 뿐이며, 바이트(예: 1500Byte)가 실제로 지켜야 하는 하드 한도가 됨. 바이트 한도만 넘지 않으면 영문·숫자가 섞여 글자수가 참고 기준을 넘어도 정상 허용함(예: 영문 위주 660자·660Byte는 통과, 한글 위주 588자·1462Byte도 통과). AI 다시쓰기 프롬프트, 재압축 프롬프트, 최종 안전장치(trimToLimit), 규칙 기반 병합(mergeHeuristic) 판정 로직을 모두 바이트 기준으로 전환함. 원문 입력창의 글자수 게이지는 '참고'로, 바이트 게이지는 '실제한도'로 라벨을 구분하고 글자수 초과만으로는 더 이상 경고색(빨강)을 쓰지 않도록 함. AI 결과 화면의 배지도 '바이트 한도 내/초과'를 우선 표시하고 글자수는 참고 정보로 별도 표시함. 규정·평가 사전 탭과 도움말 FAQ의 설명도 이 정책에 맞게 갱신함. Node로 영문 위주(글자수>참고, 바이트 여유)와 한글 위주(바이트 실제 초과) 두 케이스를 직접 검증해 의도대로 동작함을 확인함.</dd>
           <dt>v4.9 — AI 다시쓰기, 글자수·바이트수를 최대한 한도에 맞춰 채우고 부족하면 기존 내용을 보충하도록 개선</dt>
@@ -2430,6 +2440,30 @@ function wireImport(){
   ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev, e=>{e.preventDefault(); dz.classList.add('drag');}));
   ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev, e=>{e.preventDefault(); dz.classList.remove('drag');}));
   dz.addEventListener('drop', e=>{ if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files); });
+  const rawFileInput = document.getElementById('rawTextFileInput');
+  if(rawFileInput) rawFileInput.addEventListener('change', e=>handleRawTextFileImport(e.target.files));
+}
+// '01 원문 입력'창 전용 파일 불러오기 — 텍스트(.txt)나 PDF(.pdf) 파일 하나를 골라 그 내용을 원문
+// 입력창에 그대로 채운다(생기부 전체 파일 불러오기처럼 영역별로 나누지 않고, 파일 전체 텍스트를 그대로
+// 가져온다). 이미 입력된 내용이 있으면 실수로 덮어쓰지 않도록 먼저 확인한다.
+async function handleRawTextFileImport(fileListObj){
+  const files = Array.from(fileListObj || []);
+  const fileInputEl = document.getElementById('rawTextFileInput');
+  if(files.length===0) return;
+  const file = files[0];
+  const rawTextEl = document.getElementById('rawText');
+  if(rawTextEl.value.trim() && !confirm('원문 입력창에 이미 내용이 있습니다. 불러온 파일 내용으로 덮어쓸까요?')){
+    if(fileInputEl) fileInputEl.value = '';
+    return;
+  }
+  try{
+    const text = await extractTextFromFile(file);
+    rawTextEl.value = text.trim();
+    updateMeters();
+  }catch(e){
+    alert(`파일을 불러오지 못했습니다: ${e.message}`);
+  }
+  if(fileInputEl) fileInputEl.value = '';
 }
 async function handleFiles(fileListObj){
   const files = Array.from(fileListObj);
@@ -2712,6 +2746,39 @@ async function callAICompress(provider, apiKey, model, draft, targetLimit, byteL
   if(provider==='gemini') return await callGemini(apiKey, model, systemPrompt, userPrompt);
   return await callClaude(apiKey, model, systemPrompt, userPrompt);
 }
+// '보완항목 추가' 전용 프롬프트 — '기존 내용과 연계해 AI로 다시 쓰기'(전체 재구성)와 달리, 기존 문구는
+// 거의 그대로 두고 추가 자료만 문장으로 다듬어 자연스럽게 이어 붙인다. 기존 문구의 표현·순서를
+// 임의로 바꾸지 않는다는 점이 핵심 차이다.
+function buildAugmentSystemPrompt(){
+  return `너는 한국 고등학교 학교생활기록부 특기사항에 새로 관찰된 내용을 보완해 추가하는 보조 도구다. 다음 원칙을 반드시 지켜라.
+1) '기존 문구'의 문장 표현과 순서는 임의로 바꾸지 않는다 — 자연스러운 연결을 위한 최소한의 손질(접속 표현 조정, 어색한 조사 정리 등)만 허용하고, 다시 쓰거나 재구성하지 않는다.
+2) '추가 자료'는 메모 형태로 입력되었어도 관찰 서술 문체(명사형 어미로 종결하는 완결된 문장)로 다듬어서, 기존 문구 뒤에 자연스럽게 이어 붙인다.
+3) 추가 자료에 없는 구체적 수치·고유명사·결과·발언을 새로 지어내지 않는다.
+4) 다음은 결과에 포함하지 않는다: 공인어학시험, 교내외 대회 참여·수상, 모의고사·학력평가 성적, 논문 투고·등재·발표, 도서 출간, 특허 등 지식재산권 출원, 어학연수·해외봉사 등 해외활동, 부모·친인척의 직업·지위 암시, 장학생·장학금, 특정 대학명·기관명·상호명·강사명, 자격증 취득 사실, 재학 학교를 특정할 수 있는 표현.
+5) 나이스 실제 저장 한도는 바이트이며, 결과의 바이트가 하드 한도를 넘지 않아야 한다. 넘을 것 같으면 새로 추가하는 내용 쪽을 간결하게 줄여서 맞추고, 기존 문구는 최대한 그대로 유지한다. 글자수는 참고용일 뿐이며 바이트 한도 안이라면 다소 많아도 된다.
+6) 수학·과학 수식이나 기호(예: C(t)=C0(1/2)^(t/h))가 추가 자료에 섞여 있으면 그대로 옮기지 말고 그 의미를 말로 풀어서 서술한다.
+7) 문장은 명사형 어미('~함','~보임' 등)로 종결하고, 번호매기기·특수문자·마크다운 기호를 쓰지 않는다.
+8) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 않는다.`;
+}
+function buildAugmentUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit){
+  return `[영역] ${areaLabel(meta,g)}${subject?(' / 과목: '+subject):''} (${g.grade}학년)
+[분량 기준] 하드 한도는 바이트 ${byteLimit}Byte 이내(한글 1자=3Byte, 영문·숫자·공백=1Byte). 참고용 글자수 기준은 약 ${targetLimit}자이며, 바이트 한도 안이라면 이보다 글자수가 많아져도 된다.
+
+[기존 문구 — 표현·순서를 크게 바꾸지 말고 그대로 유지할 것]
+${existing || '(없음 — 추가 자료만으로 새로 작성)'}
+
+[추가 자료 — 이 내용만 관찰 서술 문체로 다듬어서 자연스럽게 이어 붙일 것]
+${extra}
+
+기존 문구는 최대한 그대로 두고, 추가 자료를 자연스럽게 이어 붙여 하나의 완결된 특기사항으로 만들어라.`;
+}
+async function callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit){
+  const systemPrompt = buildAugmentSystemPrompt();
+  const userPrompt = buildAugmentUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit);
+  if(provider==='openai') return await callOpenAI(apiKey, model, systemPrompt, userPrompt);
+  if(provider==='gemini') return await callGemini(apiKey, model, systemPrompt, userPrompt);
+  return await callClaude(apiKey, model, systemPrompt, userPrompt);
+}
 async function callClaude(apiKey, model, systemPrompt, userPrompt){
   // Claude Sonnet 5부터는 thinking 필드를 생략하면 '적응형 사고(내부 추론)'가 기본으로 켜진다.
   // 이 사고 단계도 max_tokens 예산을 함께 쓰기 때문에, 입력이 길면 사고에서 예산이 다 소진되어 정작
@@ -2943,6 +3010,62 @@ async function runMerge(){
     }
   }
   renderMergeResult(draft, mode, errMsg, focusCodes, trimmed, compressedByAI);
+}
+// '보완항목 추가' 버튼의 동작 — '기존 내용과 연계해 AI로 다시 쓰기'와 달리 기존 문구를 통째로
+// 재구성하지 않는다. 기존 문구는 거의 그대로 두고, 추가 자료만 관찰 서술 문체로 다듬어 자연스럽게
+// 이어 붙인 뒤, 마찬가지로 바이트 한도를 넘으면 재압축→절삭 안전장치를 거친다.
+async function runAugment(){
+  const existing = document.getElementById('rawText').value.trim();
+  const extra = document.getElementById('extraText').value.trim();
+  if(!extra){ alert('먼저 \'추가 자료\' 입력창에 새로 보완할 내용을 입력해 주세요.'); return; }
+
+  const meta = currentAreaMeta();
+  const g = parseGrade();
+  const subject = document.getElementById('inSubject').value;
+  const targetLimit = meta.limit;
+  const byteLimit = meta.limit*3;
+
+  const out = document.getElementById('mergeOut');
+  out.innerHTML = `<div class="merge-result"><div class="mr-head"><span><span class="spinner"></span>추가 내용을 다듬어 이어 붙이는 중…</span></div></div>`;
+
+  const provider = document.getElementById('aiProvider').value;
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('apiModel').value.trim() || PROVIDER_DEFAULTS[provider].model;
+  let draft, mode, errMsg;
+  try{
+    if(apiKey){
+      draft = await callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit);
+      draft = cleanAIDraft(draft);
+      mode = 'ai';
+    } else {
+      draft = mergeHeuristic(existing, extra, byteLimit);
+      mode = 'heuristic';
+    }
+  }catch(e){
+    draft = mergeHeuristic(existing, extra, byteLimit);
+    mode = 'error';
+    errMsg = e.message;
+  }
+  let trimmed = false;
+  let compressedByAI = false;
+  if(byteLen(draft) > byteLimit){
+    if(apiKey){
+      out.innerHTML = `<div class="merge-result"><div class="mr-head"><span><span class="spinner"></span>바이트 한도에 맞춰 다시 정리하는 중…</span></div></div>`;
+      try{
+        let recompressed = await callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit);
+        recompressed = cleanAIDraft(recompressed);
+        if(recompressed && recompressed.trim()){
+          draft = recompressed;
+          compressedByAI = true;
+        }
+      }catch(e){ /* 재압축 실패 시 아래 최종 안전장치로 진행 */ }
+    }
+    if(byteLen(draft) > byteLimit){
+      draft = trimToLimit(draft, byteLimit);
+      trimmed = true;
+    }
+  }
+  renderMergeResult(draft, mode, errMsg, [], trimmed, compressedByAI);
 }
 function renderMergeResult(draft, mode, errMsg, focusCodes, trimmed, compressedByAI){
   const track = document.getElementById('inTrack').value || Object.keys(TRACKS)[0];
