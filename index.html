@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v4.7<br>2026-1·2</div>
+    <div class="rail-foot">v4.9<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v4.7</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v4.9</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v4.7</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v4.9</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -835,7 +835,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v4.7</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v4.9</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -847,6 +847,10 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v4.9 — AI 다시쓰기, 글자수·바이트수를 최대한 한도에 맞춰 채우고 부족하면 기존 내용을 보충하도록 개선</dt>
+          <dd>'기존 내용과 연계해 AI로 다시 쓰기'의 목표 분량 지시를 강화함 — 기존 '소재가 충분하면 80% 이상'이던 기준을 '글자수·바이트 두 기준 모두 한도를 넘지 않는 선에서 95% 이상 채울 것'으로 올림. 소재(기존 문구+추가 자료)의 분량이 목표의 60% 미만으로 부족한 경우, 없는 사실을 새로 지어내는 대신 이미 있는 내용(개념·과정·결과)을 더 구체적으로 설명하거나 원리·의의를 보충해 채우도록 프롬프트에 전용 안내를 추가함. 글자수 초과 시 실행되는 재압축 단계도 채움 목표를 90%→95%로 함께 올려 일관되게 함. AI 출력 전 자체 점검 항목도 6개로 늘려 "목표 글자수에 최대한 근접하게(95% 이상) 채웠는가"를 마지막으로 확인하도록 함.</dd>
+          <dt>v4.8 — 검토 이력에 바이트수도 함께 기록</dt>
+          <dd>분석 후 검토 이력에 저장될 때 글자수뿐 아니라 나이스 실제 저장 기준인 바이트수도 함께 기록하도록 함. 검토 이력 카드 화면, 이력 수정 시 재계산, 텍스트·Word(구글독스) 내보내기 파일에도 모두 '글자수 ○○자 · 바이트 ○○Byte'로 함께 표시되도록 함. 이전에 저장돼 바이트 값이 없는 옛 기록도 화면에 표시할 때 즉석에서 계산해 보여주도록 함(호환성 유지).</dd>
           <dt>v4.7 — 두괄식 배치(비중 큰 내용 먼저) 및 압축 시 비중별 차등 조정 추가</dt>
           <dd>최초 초안 작성 시, 소재에 여러 활동·주제가 섞여 있으면 그중 분량이 많거나 구체적으로 다뤄진(비중이 큰) 내용을 글의 맨 앞에 배치하는 두괄식으로 구성하도록 규칙을 추가함(비중이 작은 소재는 뒤에 간결하게 배치). 글자수 초과로 AI 재압축이 실행될 때도 기존에는 "고르게" 압축하도록 지시했던 것을, 비중이 큰 내용은 최대한 그대로 살리고 비중이 작은 내용은 더 과감히 줄이는 방식으로 압축 강도에 차등을 두도록 수정함(두괄식 배치 자체도 압축 후 유지되도록 명시). 출력 전 자체 점검 항목도 네 가지에서 다섯 가지로 늘려 "비중이 큰 내용이 맨 앞에 오는가"를 추가함.</dd>
           <dt>v4.6 — 글자수 초과 시 단순 절삭 대신 AI가 전체 맥락을 다시 압축하도록 개선</dt>
@@ -1648,7 +1652,7 @@ function runAnalysis(){
     areaKey: meta.key, slotKeyStr: key,
     subject,
     admType: document.getElementById('inAdmType').value,
-    track, text, chars:charCount(text),
+    track, text, chars:charCount(text), bytes:byteLen(text),
     studentNo: document.getElementById('studentNo').value.trim(),
     studentName: document.getElementById('studentName').value.trim(),
     careerHope: getCareerHopeForGrade(g.grade),
@@ -1656,7 +1660,7 @@ function runAnalysis(){
   };
   state.history.unshift(entry);
   // 같은 항목(슬롯)을 다시 저장하면 이전 내용을 덮어쓴다 — 학기 구분이 없는 항목/공통과목은 학년 전체가 하나의 슬롯
-  state.slots[key] = {text, chars: entry.chars, at: entry.at};
+  state.slots[key] = {text, chars: entry.chars, bytes: entry.bytes, at: entry.at};
   saveToStorage();
   renderHistory();
   updateMeters();
@@ -1728,6 +1732,7 @@ function renderHistory(){
         <div style="text-align:right; flex-shrink:0;">
           <div style="font-family:var(--mono); font-weight:700; color:${h.issues>0?'var(--brick)':'var(--teal)'};">${h.issues>0? h.issues+'건 위반의심':'위반 없음'}</div>
           <div style="font-family:var(--mono); font-size:11.5px; color:var(--ink-soft);">완성도 ${h.avg}/5.0</div>
+          <div style="font-family:var(--mono); font-size:10.5px; color:var(--ink-faint);">${h.chars}자 · ${h.bytes!=null?h.bytes:byteLen(h.text)}Byte</div>
         </div>
       </div>
       ${isEditing ? `
@@ -1759,12 +1764,13 @@ function saveEditHistory(i){
   const avgVal = Object.values(axes).reduce((a,b)=>a+b,0)/Object.values(axes).length;
   h.text = newText;
   h.chars = charCount(newText);
+  h.bytes = byteLen(newText);
   h.issues = issues.length;
   h.avg = avgVal.toFixed(1);
   h.at = new Date();
   // 이 기록이 만들어진 항목(학년·학기·영역·과목)의 슬롯이 아직 있다면 그 내용도 함께 갱신해 분석 작업 탭과 어긋나지 않게 한다
   if(h.slotKeyStr && state.slots[h.slotKeyStr]){
-    state.slots[h.slotKeyStr] = {text:newText, chars:h.chars, at:h.at};
+    state.slots[h.slotKeyStr] = {text:newText, chars:h.chars, bytes:h.bytes, at:h.at};
   }
   editingHistoryIndex = null;
   saveToStorage();
@@ -1802,7 +1808,7 @@ function exportHistoryAsText(){
   const items = getSelectedHistoryItems();
   if(items.length===0){ alert('내보낼 항목을 먼저 선택해 주세요.'); return; }
   const content = items.map(h=>
-    `[${h.grade} · ${h.area}${h.subject?' ('+h.subject+')':''}]\n학생: ${h.studentName||'(미입력)'}${h.studentNo?' ('+h.studentNo+')':''} · 진로 희망분야: ${h.careerHope||'(미입력)'}\n${h.text}\n(글자수 ${h.chars}자 · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')})`
+    `[${h.grade} · ${h.area}${h.subject?' ('+h.subject+')':''}]\n학생: ${h.studentName||'(미입력)'}${h.studentNo?' ('+h.studentNo+')':''} · 진로 희망분야: ${h.careerHope||'(미입력)'}\n${h.text}\n(글자수 ${h.chars}자 · 바이트 ${h.bytes!=null?h.bytes:byteLen(h.text)}Byte · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')})`
   ).join('\n\n' + '-'.repeat(30) + '\n\n');
   const blob = new Blob([content], {type:'text/plain;charset=utf-8'});
   triggerDownload(blob, `생기부_초안_${new Date().toISOString().slice(0,10)}.txt`);
@@ -1814,7 +1820,7 @@ function exportHistoryAsDoc(){
     `<h3>${escapeHtml(h.grade)} · ${escapeHtml(h.area)}${h.subject?' ('+escapeHtml(h.subject)+')':''}</h3>
      <p style="color:#555; font-size:9.5pt;">학생: ${escapeHtml(h.studentName||'(미입력)')}${h.studentNo?' ('+escapeHtml(h.studentNo)+')':''} · 진로 희망분야: ${escapeHtml(h.careerHope||'(미입력)')}</p>
      <p>${escapeHtml(h.text).replace(/\n/g,'<br>')}</p>
-     <p style="color:#888; font-size:9pt;">글자수 ${h.chars}자 · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')}</p>`
+     <p style="color:#888; font-size:9pt;">글자수 ${h.chars}자 · 바이트 ${h.bytes!=null?h.bytes:byteLen(h.text)}Byte · 완성도 ${h.avg}/5.0 · ${new Date(h.at).toLocaleString('ko-KR')}</p>`
   ).join('<hr>');
   // Word/구글독스에서 열 수 있도록 .doc 확장자의 HTML 문서로 저장한다(구글 드라이브에 업로드하면 자동으로 구글 문서로 변환됨)
   const doc = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
@@ -2621,7 +2627,8 @@ function buildMergeSystemPrompt(hasPast, hasFocus, hasCareerHope){
 
 [형식·분량]
 - 번호매기기(①②, 1)), 특수문자(★, ~~, !!), 마크다운 기호를 쓰지 않는다.
-- 글자수는 띄어쓰기를 포함해 센다. 결과 전체는 반드시 목표 글자수 이내로 쓰되, 소재가 충분하면 목표의 80% 이상을 활용해 밀도 있게 쓴다. 소재가 부족하면 억지로 늘리지 말고 짧더라도 알찬 글을 우선한다.
+- 글자수(띄어쓰기 포함)와 바이트(한글 1자=3Byte, 영문·숫자·공백은 1Byte) 두 기준을 모두 넘지 않는 선에서, 결과가 목표 글자수에 최대한 가깝게(95% 이상) 채워지도록 쓴다. 목표보다 눈에 띄게 짧게 끝내지 않는다.
+- 소재(기존 문구·추가 자료)만으로 목표 글자수를 채우기 부족해 보이면, 없는 사실을 새로 지어내는 대신 이미 주어진 내용을 더 깊이 있게 풀어써서 분량을 보충한다: 이미 언급된 개념·현상이 무엇을 뜻하는지 조금 더 구체적으로 설명하거나, 이미 서술된 과정에서 왜 그런 결과가 나오는지(원리·인과관계)를 보충하거나, 이미 나온 결과·활동이 갖는 의의나 다음 학습으로 이어지는 지점을 한두 문장 덧붙이는 방식으로 확장한다. 소재에 전혀 근거가 없는 새로운 활동·수치·사건·발언을 추가하지는 않는다.
 - 기존 문구가 이미 목표를 초과한 경우, 사실을 누락시키지 말고 표현을 압축해(중복 서술 제거, 중요도 낮은 세부 위주 축약) 목표 이내로 완성한다. 문장을 도중에 자르거나 미완성 상태로 끝내지 않는다.
 ${hasPast ? `
 [이전 학기 관련 기록 활용]
@@ -2634,7 +2641,7 @@ ${hasCareerHope ? `
 학생의 진로 희망분야가 주어진다. 전공명이나 분야명을 직접 반복 언급하지 말고, 소재가 그 분야에서 요구되는 역량·사고방식과 자연스럽게 연결되는 경우에만 은근하게 드러낸다. 소재와 무관하면 반영하지 않는다.` : ''}
 
 [출력]
-완성된 특기사항 본문만 출력한다. 설명·인사말·따옴표·제목·마크다운을 붙이지 않는다. 출력하기 전에 스스로 다음 다섯 가지를 점검한다: ① 금지사항 목록의 표현이 없는가 ② 모든 문장이 명사형 어미로 끝나는가 ③ 띄어쓰기 포함 글자수가 목표 이내인가 ④ 수식·기호가 그대로 남지 않고 말로 풀어썼는가 ⑤ 비중이 큰 내용이 맨 앞에 오는 두괄식으로 배치되었는가.`;
+완성된 특기사항 본문만 출력한다. 설명·인사말·따옴표·제목·마크다운을 붙이지 않는다. 출력하기 전에 스스로 다음 여섯 가지를 점검한다: ① 금지사항 목록의 표현이 없는가 ② 모든 문장이 명사형 어미로 끝나는가 ③ 띄어쓰기 포함 글자수가 목표 이내인가 ④ 수식·기호가 그대로 남지 않고 말로 풀어썼는가 ⑤ 비중이 큰 내용이 맨 앞에 오는 두괄식으로 배치되었는가 ⑥ 목표 글자수에 최대한 근접하게(95% 이상) 채웠는가 — 부족하면 없는 사실을 짓기 전에 이미 있는 내용을 더 깊이 풀어썼는지 다시 확인한다.`;
 }
 function buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, pastRecords, focusCodes, careerHope){
   const pastBlock = (pastRecords && pastRecords.length)
@@ -2650,8 +2657,12 @@ function buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, pa
   const overLimitNote = existingChars > targetLimit
     ? `\n[참고] 기존 문구가 이미 ${existingChars}자로 목표 글자수(${targetLimit}자)를 초과한 상태다. 사실은 유지하되 표현을 압축해 목표 글자수 이내로 완성하라.\n`
     : '';
+  const sourceChars = charCount(existing) + charCount(extra);
+  const shortNote = sourceChars < targetLimit*0.6
+    ? `\n[참고] 지금 주어진 소재만으로는 분량이 목표에 비해 부족할 수 있다. 없는 사실을 지어내지 말고, 이미 있는 내용(개념·과정·결과)을 더 구체적으로 설명하거나 그 의의를 보충하는 방식으로 목표 글자수에 최대한 가깝게 채워라.\n`
+    : '';
   return `[영역] ${areaLabel(meta,g)}${subject?(' / 과목: '+subject):''} (${g.grade}학년)
-[목표 글자수] 결과 전체 ${targetLimit}자 이내 · 띄어쓰기 포함 기준 (기존 문구를 재구성한 부분 포함)${overLimitNote}
+[목표 글자수] 결과 전체 ${targetLimit}자(바이트 ${targetLimit*3} 이내) · 띄어쓰기 포함 기준 · 95% 이상 채울 것 (기존 문구를 재구성한 부분 포함)${overLimitNote}${shortNote}
 ${hopeBlock}${focusBlock}${pastBlock}
 [기존 문구]
 ${existing || '(없음 — 추가 자료만으로 새로 작성)'}
@@ -2677,12 +2688,12 @@ function buildCompressSystemPrompt(){
 1) 원문에 담긴 사실(활동 내용·관찰된 사실)은 하나도 빠뜨리지 말고 유지하되, 표현을 간결하게 다듬어 전체 분량을 줄인다.
 2) 뒷부분을 그대로 잘라내는 방식은 절대 쓰지 마라. 글 전체를 처음부터 끝까지 다시 훑어 압축하되, 모든 부분을 균등하게 줄이지 않는다. 원문에서 분량이 많거나 구체적으로 다뤄진(비중이 큰) 내용은 최대한 그대로 살리고, 상대적으로 비중이 작았던(짧게 언급된) 내용은 한두 문장으로 간결하게 요약하거나 과감히 줄여, 비중에 따라 압축 강도에 차등을 둔다. 비중이 큰 내용이 맨 앞에 오는 두괄식 배치는 그대로 유지한다.
 3) 문장은 명사형 어미('~함','~보임' 등)로 종결하고, 번호매기기·특수문자·마크다운 기호를 쓰지 않는다.
-4) 결과는 목표 글자수(띄어쓰기 포함) 이내여야 하며, 지나치게 짧게 줄이지 말고 목표 글자수에 최대한 가깝게(90% 이상) 채워 밀도 있게 압축한다.
+4) 결과는 목표 글자수(띄어쓰기 포함) 이내여야 하며, 지나치게 짧게 줄이지 말고 목표 글자수에 최대한 가깝게(95% 이상) 채워 밀도 있게 압축한다.
 5) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 마라.`;
 }
 function buildCompressUserPrompt(draft, targetLimit){
   const chars = charCount(draft);
-  return `[목표 글자수] ${targetLimit}자 이내 · 띄어쓰기 포함 기준 (목표의 90% 이상을 채울 것)
+  return `[목표 글자수] ${targetLimit}자 이내 · 띄어쓰기 포함 기준 (목표의 95% 이상을 채울 것)
 [현재 글자수] ${chars}자 (목표보다 ${chars-targetLimit}자 초과한 상태)
 
 [압축할 원문]
