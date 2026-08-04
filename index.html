@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -448,7 +448,7 @@ function ensureXlsxLoaded(){
         <span class="tip">도움말</span>
       </button>
     </nav>
-    <div class="rail-foot">v5.4<br>2026-1·2</div>
+    <div class="rail-foot">v5.5<br>2026-1·2</div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -459,7 +459,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Whole-Record Direction</div>
-          <h1 class="pagetitle">종합 진단<span class="vpill">v5.4</span></h1>
+          <h1 class="pagetitle">종합 진단<span class="vpill">v5.5</span></h1>
           <p class="sub">생기부 전체 파일을 불러오면 학기·영역별 흐름을 진단합니다. <b>과거에 입력된 내용은 고치지 않으며</b>, 이번 학기와 다음 학기에 무엇을 보완하면 좋을지만 제안합니다. 입력한 내용은 ‘기록 초기화’를 누르기 전까지 새로고침해도 유지됩니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -551,7 +551,7 @@ function ensureXlsxLoaded(){
       <div class="topline">
         <div>
           <div class="eyebrow">Analysis Desk</div>
-          <h1 class="pagetitle">분석 작업<span class="vpill">v5.4</span></h1>
+          <h1 class="pagetitle">분석 작업<span class="vpill">v5.5</span></h1>
           <p class="sub">영역을 선택하고 초안을 입력하면 규정 검사 → 정성 채점 → 나침반 제안이 동시에 계산됩니다. 파일을 불러오거나 추가 자료를 입력해 AI로 이어 쓸 수 있습니다.</p>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -676,6 +676,16 @@ function ensureXlsxLoaded(){
             <label>지원 계열</label>
             <select id="inTrack"></select>
           </div>
+        </div>
+
+        <div class="field" style="max-width:420px; margin:0 0 16px;">
+          <label>기초학습역량 (AI 다시쓰기·보완항목 추가의 서술 수준)</label>
+          <div class="tabs" id="levelTabs" style="margin-bottom:0;">
+            <div class="tab active" data-level="상" onclick="setAcademicLevel('상')">상</div>
+            <div class="tab" data-level="중" onclick="setAcademicLevel('중')">중</div>
+            <div class="tab" data-level="하" onclick="setAcademicLevel('하')">하</div>
+          </div>
+          <p style="font-size:10.6px; color:var(--ink-faint); margin:6px 0 0;">학생의 기초학습역량 수준을 선택하면 AI가 다시 쓰기·보완항목 추가를 할 때 평가적 표현의 강도를 그에 맞춥니다 — <b>상</b>: 기존 서술 수준 유지, <b>중·하</b>: 사실은 그대로 담되 지나치게 높게 평가되지 않도록 평가어의 강도를 단계적으로 낮춥니다.</p>
         </div>
 
         <div class="workspace-grid">
@@ -843,7 +853,7 @@ function ensureXlsxLoaded(){
 
       <div class="grid-2">
         <div class="card pad help-block">
-          <h3>이 앱의 구조 <span class="vpill">v5.0</span></h3>
+          <h3>이 앱의 구조 <span class="vpill">v5.5</span></h3>
           <p class="sub" style="margin:0;">① 종합 진단(전체 방향성) → ② 규정 검사(적발) → ③ 정성 채점(평가) → ④ 나침반 제안(고쳐쓰기 방향) → ⑤ AI 연계 병합(초안 생성). 어떤 단계도 <b>교사의 최종 확인을 대체하지 않습니다.</b> AI 병합 기능도 결과를 자동 반영하지 않고 ‘적용’을 눌러야만 원문에 반영됩니다.</p>
         </div>
         <div class="card pad help-block">
@@ -855,6 +865,8 @@ function ensureXlsxLoaded(){
       <div class="card pad" style="margin-top:16px;">
         <h3 style="font-family:var(--serif); font-size:17px; margin-top:0;">버전 기록</h3>
         <dl class="faq">
+          <dt>v5.5 — 기초학습역량(상/중/하) 선택 기능 추가 — 서술 수준 단계별 조정</dt>
+          <dd>'새로 작성할 내용' 영역에 '기초학습역량' 선택 탭(상/중/하)을 새로 추가함(브라우저에 저장되어 다음에도 유지됨). <b>상</b>은 기존 서술 수준을 그대로 유지하고, <b>중</b>은 '뛰어난·탁월한·우수한' 같은 강한 최상급 평가어 대신 '~을 이해함·~을 향상시킴'처럼 담백한 관찰 서술 위주로 낮추며, <b>하</b>는 적극적 평가·우수성 강조 표현을 자제하고 시도한 노력과 과정 중심으로 더욱 담백하게 서술하도록 함. 관찰된 사실 자체는 상/중/하 모두 동일하게 유지되며, 오직 평가적 표현의 강도만 조정됨(v5.4에서 추가한 '교사의 평가적 판단 포함' 규칙을 단계적으로 완화하는 방식). '기존 내용과 연계해 AI로 다시 쓰기', '보완항목 추가', 글자수 초과 시 재압축 단계까지 모두 동일한 수준으로 일관되게 적용됨. Node로 상/중/하 세 단계 모두 프롬프트에 의도대로 반영되는지 9개 항목 검증함.</dd>
           <dt>v5.4 — AI 다시쓰기에 평가 기준(5축·12요소)에 근거한 교사의 우수성 평가 포함</dt>
           <dd>사실 나열에 그치지 않고, 서술된 행동·과정에서 실제로 드러나는 역량에 대한 교사의 평가적 판단을 문장에 자연스럽게 포함하도록 규칙을 추가함 — 이 앱이 진단 기준으로 삼는 기초학업역량·학습의 주도성·전공(진로)적합성·협업소통능력·역할의 주도성 중 소재의 구체적 행동·과정에서 실제로 근거를 찾을 수 있는 역량이 있으면 그 우수성을 교사의 관찰 언어로 짚어주게 함(예: '복잡한 자료를 체계적으로 정리하는 논리적 사고력이 돋보임'). 근거 없이 막연한 칭찬만 나열하지 않도록, 반드시 구체적 행동·과정과 연결지어 왜 우수한지 드러나게 쓰고 소재에서 실제로 드러나지 않는 역량은 있는 것처럼 평가하지 않도록 명시함. C01~C12 같은 내부 코드명은 실제 생기부 문장에는 절대 노출하지 않고 자연스러운 평가 문장으로만 반영됨. 출력 전 자체 점검 항목도 8개로 늘림.</dd>
           <dt>v5.3 — 심화주제탐구형 소재 전용 서술 순서 규칙 추가</dt>
@@ -1139,6 +1151,25 @@ const TIPS = [
    ========================================================= */
 const state = { history: [], slots: {} }; // history: 화면표시용 로그(append-only) / slots: 예산 계산용 최신 저장본(항목별 최신 초안)
 let currentTermOverride = null; // '현재 학년·학기' — 교사가 지정하면 종합진단의 이번학기/다음학기 판정 기준이 됨
+let academicLevel = '상'; // 기초학습역량(서술 수준) — '상'은 기존 서술 수준 유지, '중'·'하'는 AI 다시쓰기·보완항목 추가 시 평가어 강도를 낮춤
+function setAcademicLevel(level){
+  academicLevel = level;
+  document.querySelectorAll('#levelTabs .tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.level===level);
+  });
+  try{ localStorage.setItem('nachimban_academic_level', level); }catch(e){}
+}
+function loadAcademicLevel(){
+  try{
+    const saved = localStorage.getItem('nachimban_academic_level');
+    if(saved && ['상','중','하'].includes(saved)){
+      academicLevel = saved;
+      document.querySelectorAll('#levelTabs .tab').forEach(t=>{
+        t.classList.toggle('active', t.dataset.level===saved);
+      });
+    }
+  }catch(e){}
+}
 
 /* =========================================================
    1-B. 저장소(localStorage) — '기록 초기화'를 누르기 전까지 새로고침해도 입력 내용이 남도록 함
@@ -2651,7 +2682,20 @@ function onProviderChange(){
   renderApiKeyStatus();
 }
 
-function buildMergeSystemPrompt(hasPast, hasFocus, hasCareerHope){
+// 기초학습역량 수준에 따라 평가적 표현의 강도를 조절하는 지시문을 만든다. '상'은 기존 서술 수준을
+// 그대로 유지하므로 별도 지시가 필요 없다(빈 문자열 반환). '중'·'하'는 사실 서술은 그대로 담되
+// 평가어(우수성 강조 표현)의 강도만 단계적으로 낮춘다 — 8번 규칙(교사의 평가적 판단 포함)이
+// 지나치게 높은 평가로 이어지지 않도록 하기 위함이다.
+function buildLevelNote(level){
+  if(level==='중'){
+    return `\n[서술 수준 조정 — 기초학습역량: 중]\n이 학생의 기초학습역량은 '중' 수준으로 설정되었다. 관찰된 사실과 활동 내용, 노력의 과정은 그대로 담되, 8번 규칙에 따른 평가적 표현의 강도는 한 단계 낮춘다. '뛰어난', '탁월한', '우수한' 같은 강한 최상급 평가어 대신 '~을 이해함', '~을 향상시킴', '~에 노력을 기울임'처럼 담백한 관찰 서술을 위주로 쓴다. 역량에 대한 평가는 과장하지 말고 사실에 근거해 절제된 어조로 표현한다.\n`;
+  }
+  if(level==='하'){
+    return `\n[서술 수준 조정 — 기초학습역량: 하]\n이 학생의 기초학습역량은 '하' 수준으로 설정되었다. 관찰된 사실과 시도한 노력의 과정은 그대로 담되, 8번 규칙에 따른 적극적인 평가나 우수성을 강조하는 표현은 자제한다. 결과보다는 시도한 노력과 과정 중심으로 담백하게 서술하고, 화려한 수사나 과도하게 긍정적인 평가어는 피한다. 성장이 있었다면 그 사실 자체는 서술하되 과장된 어조를 쓰지 않는다.\n`;
+  }
+  return '';
+}
+function buildMergeSystemPrompt(hasPast, hasFocus, hasCareerHope, academicLevel){
   return `너는 한국 고등학교 학교생활기록부(생기부) 서술형 항목 작성을 돕는 전문 보조 도구다. 교육부 '학교생활기록부 기재요령'과 대입(학생부종합전형) 평가 관점을 모두 이해하는 숙련된 교사의 눈높이로 작성한다.
 
 [서술 원칙]
@@ -2663,7 +2707,7 @@ function buildMergeSystemPrompt(hasPast, hasFocus, hasCareerHope){
 6) 학생의 구체적 역할(조장·발표·자료조사 등)과 협업 과정(의견 조율 방식)이 소재에 있으면 빠뜨리지 말고 살린다. 어려움·시행착오와 그 해결 과정이 소재에 있으면 성장 서사의 핵심이므로 반드시 포함한다.
 7) 소재(기존 문구·추가 자료)에 서로 다른 활동·주제가 섞여 있다면, 그중 분량이 많거나 구체적으로 서술된(비중이 큰) 내용을 글의 맨 앞에 배치하는 두괄식으로 구성한다. 상대적으로 비중이 작은(짧게 언급된) 소재는 뒤쪽에 간결하게 붙인다. 단, 하나의 활동 안에서는 계기→과정→결과→성장의 흐름을 유지한다.
 8) 사실을 나열하는 데 그치지 않고, 서술된 행동·과정에서 실제로 드러나는 역량에 대한 교사의 평가적 판단을 문장에 자연스럽게 포함한다. 이 앱이 진단 기준으로 삼는 기초학업역량·학습의 주도성·전공(진로)적합성·협업소통능력·역할의 주도성 등의 요소 중, 소재의 구체적 행동·과정에서 실제로 근거를 찾을 수 있는 역량이 있으면 그 우수성을 교사의 관찰 언어로 짚어준다(예: '복잡한 자료를 체계적으로 정리하는 논리적 사고력이 돋보임', '의견이 엇갈리는 상황을 중재하는 협업 역량을 보임' 등). 근거 없이 막연한 칭찬('훌륭한 학생임', '뛰어남')만 나열하지 말고, 반드시 구체적 행동·과정과 연결지어 왜 우수한지 드러나게 쓴다. 소재에서 실제로 드러나지 않는 역량은 있는 것처럼 평가하지 않는다.
-
+${buildLevelNote(academicLevel)}
 [심화주제탐구형 서술 순서]
 소재가 심화주제탐구(보고서형 탐구활동, 자유주제탐구 등)에 관한 내용이면, 3번 규칙의 일반적인 계기→과정→결과→성장 흐름 대신 다음의 더 구체적인 순서로 구성한다(소재에 있는 단계만 반영하고, 없는 단계는 억지로 만들어 넣지 않고 자연스럽게 생략한다):
 ① 글 맨 앞에서 이 탐구를 하게 된 이유를 관련 수업 내용과 연결지어 간단히 언급한다.
@@ -2696,7 +2740,7 @@ ${hasCareerHope ? `
 학생의 진로 희망분야가 주어진다. 전공명이나 분야명을 직접 반복 언급하지 말고, 소재가 그 분야에서 요구되는 역량·사고방식과 자연스럽게 연결되는 경우에만 은근하게 드러낸다. 소재와 무관하면 반영하지 않는다.` : ''}
 
 [출력]
-완성된 특기사항 본문만 출력한다. 설명·인사말·따옴표·제목·마크다운을 붙이지 않는다. 출력하기 전에 스스로 다음 여덟 가지를 점검한다: ① 금지사항 목록의 표현이 없는가 ② 모든 문장이 명사형 어미로 끝나는가 ③ 바이트가 하드 한도 이내인가(글자수 초과는 무방) ④ 수식·기호가 그대로 남지 않고 말로 풀어썼는가 ⑤ 비중이 큰 내용이 맨 앞에 오는 두괄식으로 배치되었는가 ⑥ 바이트 한도에 최대한 근접하게(99% 이상) 채웠는가 — 부족하면 없는 사실을 짓기 전에 이미 있는 내용을 더 깊이 풀어썼는지 다시 확인한다 ⑦ 심화주제탐구형 소재라면 정해진 여섯 단계 순서(수업 연계 계기→탐구내용→수업내용 부연→독후활동→개별후속활동→조별후속활동)를 따랐는가 ⑧ 근거 있는 역량에 대한 교사의 평가적 판단이 자연스럽게 녹아 있는가(막연한 칭찬 나열이 아닌지).`;
+완성된 특기사항 본문만 출력한다. 설명·인사말·따옴표·제목·마크다운을 붙이지 않는다. 출력하기 전에 스스로 다음 ${(academicLevel==='중'||academicLevel==='하')?'아홉':'여덟'} 가지를 점검한다: ① 금지사항 목록의 표현이 없는가 ② 모든 문장이 명사형 어미로 끝나는가 ③ 바이트가 하드 한도 이내인가(글자수 초과는 무방) ④ 수식·기호가 그대로 남지 않고 말로 풀어썼는가 ⑤ 비중이 큰 내용이 맨 앞에 오는 두괄식으로 배치되었는가 ⑥ 바이트 한도에 최대한 근접하게(99% 이상) 채웠는가 — 부족하면 없는 사실을 짓기 전에 이미 있는 내용을 더 깊이 풀어썼는지 다시 확인한다 ⑦ 심화주제탐구형 소재라면 정해진 여섯 단계 순서(수업 연계 계기→탐구내용→수업내용 부연→독후활동→개별후속활동→조별후속활동)를 따랐는가 ⑧ 근거 있는 역량에 대한 교사의 평가적 판단이 자연스럽게 녹아 있는가(막연한 칭찬 나열이 아닌지)${(academicLevel==='중'||academicLevel==='하')?' ⑨ 기초학습역량 설정('+academicLevel+')에 맞게 평가어 강도가 적절히 낮춰졌는가.':'.'}`;
 }
 function buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope){
   const pastBlock = (pastRecords && pastRecords.length)
@@ -2728,8 +2772,8 @@ ${extra || '(없음 — 새로 반영할 내용 없이, 기존 문구를 형식�
 위 규칙을 지켜 기존 문구와 추가 자료를 하나의 자연스러운 특기사항으로 통합해 다시 써라.`;
 }
 // 세 서비스 모두 시스템 프롬프트/유저 프롬프트 내용은 동일하게 구성하고, API 호출 형식만 서비스별로 다르게 처리한다.
-async function callAIMerge(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope){
-  const systemPrompt = buildMergeSystemPrompt(pastRecords && pastRecords.length>0, focusCodes && focusCodes.length>0, !!careerHope);
+async function callAIMerge(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope, academicLevel){
+  const systemPrompt = buildMergeSystemPrompt(pastRecords && pastRecords.length>0, focusCodes && focusCodes.length>0, !!careerHope, academicLevel);
   const userPrompt = buildMergeUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope);
   if(provider==='openai') return await callOpenAI(apiKey, model, systemPrompt, userPrompt);
   if(provider==='gemini') return await callGemini(apiKey, model, systemPrompt, userPrompt);
@@ -2738,13 +2782,14 @@ async function callAIMerge(provider, apiKey, model, existing, extra, meta, subje
 // 1차로 만든 초안이 바이트 한도를 넘을 때 쓰는 전용 압축 프롬프트. 뒷부분만 잘라내는 기계적 절삭 대신,
 // 전체 문장을 다시 훑어 표현을 줄이고 비중을 재조정하도록 명시적으로 지시한다. 한도에 최대한
 // 근접하게(너무 짧게 줄이지 않고) 채우도록 요구해, 압축이 과도해지는 것도 함께 방지한다.
-function buildCompressSystemPrompt(){
+function buildCompressSystemPrompt(academicLevel){
   return `너는 한국 고등학교 학교생활기록부 특기사항 문장을 목표 분량에 맞게 압축하는 전문가다. 다음 원칙을 반드시 지켜라.
 1) 원문에 담긴 사실(활동 내용·관찰된 사실)은 하나도 빠뜨리지 말고 유지하되, 표현을 간결하게 다듬어 전체 분량을 줄인다.
 2) 뒷부분을 그대로 잘라내는 방식은 절대 쓰지 마라. 글 전체를 처음부터 끝까지 다시 훑어 압축하되, 모든 부분을 균등하게 줄이지 않는다. 원문에서 분량이 많거나 구체적으로 다뤄진(비중이 큰) 내용은 최대한 그대로 살리고, 상대적으로 비중이 작았던(짧게 언급된) 내용은 한두 문장으로 간결하게 요약하거나 과감히 줄여, 비중에 따라 압축 강도에 차등을 둔다. 비중이 큰 내용이 맨 앞에 오는 두괄식 배치, 그리고 심화주제탐구형 서술이라면 그 순서(수업 연계 계기→탐구내용→수업내용 부연→독후활동→개별후속활동→조별후속활동)도 그대로 유지한다.
 3) 문장은 명사형 어미('~함','~보임' 등)로 종결하고, 번호매기기·특수문자·마크다운 기호를 쓰지 않는다.
 4) 나이스 실제 저장 한도는 바이트이며, 결과의 바이트가 하드 한도를 넘지 않아야 한다(반드시 지킬 것). 글자수는 참고용일 뿐이며 바이트 한도 안이라면 다소 많아도 된다. 지나치게 짧게 줄이지 말고 바이트 한도에 최대한 가깝게(99% 이상) 채워 밀도 있게 압축한다.
-5) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 마라.`;
+5) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 마라.
+6) 압축하면서 평가적 표현의 어조나 강도를 원문보다 더 높이지 않는다 — 원문에 이미 반영된 기초학습역량 서술 수준을 그대로 유지한다.${(academicLevel==='중'||academicLevel==='하') ? ` 이 학생의 기초학습역량은 '${academicLevel}' 수준이므로, 압축 과정에서 '뛰어난'·'탁월한' 같은 강한 평가어가 새로 끼어들지 않도록 특히 주의한다.` : ''}`;
 }
 function buildCompressUserPrompt(draft, targetLimit, byteLimit){
   const bytes = byteLen(draft);
@@ -2756,8 +2801,8 @@ ${draft}
 
 위 원문을 사실 관계는 유지한 채, 비중이 큰 내용은 최대한 살리고 비중이 작은 내용은 더 과감히 줄이는 방식으로 바이트 한도 이내로 압축해 다시 써라. 뒷부분만 잘라내지 말고 처음부터 끝까지 다시 훑어 압축하라.`;
 }
-async function callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit){
-  const systemPrompt = buildCompressSystemPrompt();
+async function callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit, academicLevel){
+  const systemPrompt = buildCompressSystemPrompt(academicLevel);
   const userPrompt = buildCompressUserPrompt(draft, targetLimit, byteLimit);
   if(provider==='openai') return await callOpenAI(apiKey, model, systemPrompt, userPrompt);
   if(provider==='gemini') return await callGemini(apiKey, model, systemPrompt, userPrompt);
@@ -2766,7 +2811,7 @@ async function callAICompress(provider, apiKey, model, draft, targetLimit, byteL
 // '보완항목 추가' 전용 프롬프트 — '기존 내용과 연계해 AI로 다시 쓰기'(전체 재구성)와 달리, 기존 문구는
 // 거의 그대로 두고 추가 자료만 문장으로 다듬어 자연스럽게 이어 붙인다. 기존 문구의 표현·순서를
 // 임의로 바꾸지 않는다는 점이 핵심 차이다.
-function buildAugmentSystemPrompt(){
+function buildAugmentSystemPrompt(academicLevel){
   return `너는 한국 고등학교 학교생활기록부 특기사항에 새로 관찰된 내용을 보완해 추가하는 보조 도구다. 다음 원칙을 반드시 지켜라.
 1) '기존 문구'의 문장 표현과 순서는 임의로 바꾸지 않는다 — 자연스러운 연결을 위한 최소한의 손질(접속 표현 조정, 어색한 조사 정리 등)만 허용하고, 다시 쓰거나 재구성하지 않는다.
 2) '추가 자료'는 메모 형태로 입력되었어도 관찰 서술 문체(명사형 어미로 종결하는 완결된 문장)로 다듬어서, 기존 문구 뒤에 자연스럽게 이어 붙인다.
@@ -2775,7 +2820,8 @@ function buildAugmentSystemPrompt(){
 5) 나이스 실제 저장 한도는 바이트이며, 결과의 바이트가 하드 한도를 넘지 않아야 한다. 넘을 것 같으면 새로 추가하는 내용 쪽을 간결하게 줄여서 맞추고, 기존 문구는 최대한 그대로 유지한다. 글자수는 참고용일 뿐이며 바이트 한도 안이라면 다소 많아도 된다.
 6) 수학·과학 수식이나 기호(예: C(t)=C0(1/2)^(t/h))가 추가 자료에 섞여 있으면 그대로 옮기지 말고 그 의미를 말로 풀어서 서술한다.
 7) 문장은 명사형 어미('~함','~보임' 등)로 종결하고, 번호매기기·특수문자·마크다운 기호를 쓰지 않는다.
-8) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 않는다.`;
+8) 완성된 문장 본문만 출력하고 설명·인사말·따옴표·머리말을 붙이지 않는다.
+${buildLevelNote(academicLevel)}`;
 }
 function buildAugmentUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit){
   return `[영역] ${areaLabel(meta,g)}${subject?(' / 과목: '+subject):''} (${g.grade}학년)
@@ -2789,8 +2835,8 @@ ${extra}
 
 기존 문구는 최대한 그대로 두고, 추가 자료를 자연스럽게 이어 붙여 하나의 완결된 특기사항으로 만들어라.`;
 }
-async function callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit){
-  const systemPrompt = buildAugmentSystemPrompt();
+async function callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, academicLevel){
+  const systemPrompt = buildAugmentSystemPrompt(academicLevel);
   const userPrompt = buildAugmentUserPrompt(existing, extra, meta, subject, g, targetLimit, byteLimit);
   if(provider==='openai') return await callOpenAI(apiKey, model, systemPrompt, userPrompt);
   if(provider==='gemini') return await callGemini(apiKey, model, systemPrompt, userPrompt);
@@ -2991,7 +3037,7 @@ async function runMerge(){
   let draft, mode, errMsg;
   try{
     if(apiKey){
-      draft = await callAIMerge(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope);
+      draft = await callAIMerge(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, pastRecords, focusCodes, careerHope, academicLevel);
       draft = cleanAIDraft(draft);
       mode = 'ai';
     } else {
@@ -3013,7 +3059,7 @@ async function runMerge(){
     if(apiKey){
       out.innerHTML = `<div class="merge-result"><div class="mr-head"><span><span class="spinner"></span>바이트 한도에 맞춰 전체 내용을 다시 압축하는 중…</span></div></div>`;
       try{
-        let recompressed = await callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit);
+        let recompressed = await callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit, academicLevel);
         recompressed = cleanAIDraft(recompressed);
         if(recompressed && recompressed.trim()){
           draft = recompressed;
@@ -3051,7 +3097,7 @@ async function runAugment(){
   let draft, mode, errMsg;
   try{
     if(apiKey){
-      draft = await callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit);
+      draft = await callAIAugment(provider, apiKey, model, existing, extra, meta, subject, g, targetLimit, byteLimit, academicLevel);
       draft = cleanAIDraft(draft);
       mode = 'ai';
     } else {
@@ -3069,7 +3115,7 @@ async function runAugment(){
     if(apiKey){
       out.innerHTML = `<div class="merge-result"><div class="mr-head"><span><span class="spinner"></span>바이트 한도에 맞춰 다시 정리하는 중…</span></div></div>`;
       try{
-        let recompressed = await callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit);
+        let recompressed = await callAICompress(provider, apiKey, model, draft, targetLimit, byteLimit, academicLevel);
         recompressed = cleanAIDraft(recompressed);
         if(recompressed && recompressed.trim()){
           draft = recompressed;
@@ -3413,6 +3459,7 @@ function renderOverview(){
 const restored = loadFromStorage();
 initForm();
 wireImport();
+loadAcademicLevel();
 document.getElementById('aiProvider').addEventListener('change', onProviderChange);
 document.getElementById('apiKey').addEventListener('change', saveCurrentApiKey);
 document.getElementById('apiModel').addEventListener('change', saveCurrentApiKey);
